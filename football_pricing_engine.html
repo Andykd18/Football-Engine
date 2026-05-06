@@ -1,0 +1,573 @@
+
+<h2 class="sr-only">Football pricing engine — interactive Poisson model for scoreline and outcome probabilities with market value detection</h2>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+
+.engine {
+  padding: 1.5rem 0;
+  max-width: 680px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: 12px;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.team-card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem 1.25rem;
+}
+
+.team-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.xg-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.xg-row label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  min-width: 70px;
+}
+
+.xg-row input[type=range] {
+  flex: 1;
+}
+
+.xg-row .val {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  min-width: 32px;
+  text-align: right;
+}
+
+.odds-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.odds-row label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  min-width: 70px;
+}
+
+.odds-row input[type=number] {
+  width: 80px;
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
+}
+
+.draw-card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.draw-card .odds-row label { min-width: 90px; }
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.metric-value {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.metric-sub {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+.value-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--border-radius-md);
+  margin-top: 6px;
+}
+
+.value-yes {
+  background: var(--color-background-success);
+  color: var(--color-text-success);
+}
+
+.value-no {
+  background: var(--color-background-danger);
+  color: var(--color-text-danger);
+}
+
+.value-neu {
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+}
+
+.scoreline-section {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.scoreline-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.score-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  font-size: 10px;
+  font-weight: 500;
+  cursor: default;
+  transition: opacity 0.15s;
+  position: relative;
+}
+
+.score-cell .score-label {
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.score-cell .score-pct {
+  font-size: 9px;
+  margin-top: 1px;
+}
+
+.axis-label {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  font-weight: 500;
+}
+
+.axis-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+
+.scoreline-axis-row {
+  display: grid;
+  grid-template-columns: 1fr repeat(7,1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.scoreline-with-axis {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.y-axis-labels {
+  display: grid;
+  grid-template-rows: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.chart-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.chart-bar-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  min-width: 80px;
+  text-align: right;
+}
+
+.chart-bar-track {
+  flex: 1;
+  height: 22px;
+  background: var(--color-background-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.chart-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  transition: width 0.3s ease;
+}
+
+.chart-bar-pct {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  min-width: 36px;
+}
+
+.edge-table {
+  width: 100%;
+  font-size: 13px;
+  border-collapse: collapse;
+}
+
+.edge-table th {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.edge-table td {
+  padding: 6px 8px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  color: var(--color-text-primary);
+}
+
+.edge-table tr:last-child td { border-bottom: none; }
+
+.positive { color: var(--color-text-success); font-weight: 500; }
+.negative { color: var(--color-text-danger); }
+
+.btn-run {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1.5rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-primary);
+  transition: background 0.15s;
+}
+
+.btn-run:hover { background: var(--color-background-secondary); }
+
+.divider {
+  height: 0.5px;
+  background: var(--color-border-tertiary);
+  margin: 1.5rem 0;
+}
+</style>
+
+<div class="engine">
+
+  <p class="section-label">Expected goals input</p>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="team-name" id="home-name-display">Home team</div>
+      <input type="text" id="home-name" placeholder="Home team name" style="width:100%;font-size:13px;margin-bottom:10px;padding:4px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary);" value="Leeds United">
+      <div class="xg-row">
+        <label>xG (attack)</label>
+        <input type="range" min="0.3" max="3.5" step="0.05" value="1.70" id="home-xg">
+        <span class="val" id="home-xg-val">1.70</span>
+      </div>
+      <div class="odds-row">
+        <label>Market odds</label>
+        <input type="number" id="home-odds" value="3.20" step="0.05" min="1.01">
+      </div>
+    </div>
+    <div class="team-card">
+      <div class="team-name" id="away-name-display">Away team</div>
+      <input type="text" id="away-name" placeholder="Away team name" style="width:100%;font-size:13px;margin-bottom:10px;padding:4px 8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-primary);" value="Tottenham">
+      <div class="xg-row">
+        <label>xG (attack)</label>
+        <input type="range" min="0.3" max="3.5" step="0.05" value="1.45" id="away-xg">
+        <span class="val" id="away-xg-val">1.45</span>
+      </div>
+      <div class="odds-row">
+        <label>Market odds</label>
+        <input type="number" id="away-odds" value="2.10" step="0.05" min="1.01">
+      </div>
+    </div>
+  </div>
+
+  <div class="draw-card">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="odds-row" style="flex:1">
+        <label>Draw odds</label>
+        <input type="number" id="draw-odds" value="3.40" step="0.05" min="1.01">
+      </div>
+      <div class="odds-row" style="flex:1">
+        <label>Min edge %</label>
+        <input type="number" id="min-edge" value="5" step="1" min="0" max="50">
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-run" onclick="runModel()">Calculate probabilities ↗</button>
+
+  <p class="section-label">outcome probabilities</p>
+  <div class="results-grid" id="results-grid">
+    <div class="metric-card">
+      <div class="metric-label" id="home-result-label">Home win</div>
+      <div class="metric-value" id="home-prob">—</div>
+      <div class="metric-sub" id="home-implied">—</div>
+      <span class="value-badge value-neu" id="home-badge">—</span>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Draw</div>
+      <div class="metric-value" id="draw-prob">—</div>
+      <div class="metric-sub" id="draw-implied">—</div>
+      <span class="value-badge value-neu" id="draw-badge">—</span>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label" id="away-result-label">Away win</div>
+      <div class="metric-value" id="away-prob">—</div>
+      <div class="metric-sub" id="away-implied">—</div>
+      <span class="value-badge value-neu" id="away-badge">—</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <p class="section-label">Most likely scorelines</p>
+  <div id="scoreline-bars" style="margin-bottom:1.5rem;"></div>
+
+  <div class="divider"></div>
+  <p class="section-label">Scoreline probability matrix</p>
+  <div id="matrix-container"></div>
+
+  <div class="divider"></div>
+  <p class="section-label">Value detection summary</p>
+  <div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;">
+    <table class="edge-table" id="edge-table">
+      <thead><tr><th>Market</th><th>Model prob</th><th>Implied prob</th><th>Edge</th><th>Verdict</th></tr></thead>
+      <tbody id="edge-tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+function poisson(lambda, k) {
+  let logP = -lambda + k * Math.log(lambda);
+  for (let i = 2; i <= k; i++) logP -= Math.log(i);
+  return Math.exp(logP);
+}
+
+function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+
+function oddsToImplied(odds) { return 1 / parseFloat(odds); }
+
+document.getElementById('home-xg').addEventListener('input', function() {
+  document.getElementById('home-xg-val').textContent = parseFloat(this.value).toFixed(2);
+});
+document.getElementById('away-xg').addEventListener('input', function() {
+  document.getElementById('away-xg-val').textContent = parseFloat(this.value).toFixed(2);
+});
+document.getElementById('home-name').addEventListener('input', function() {
+  document.getElementById('home-name-display').textContent = this.value || 'Home team';
+  document.getElementById('home-result-label').textContent = (this.value || 'Home') + ' win';
+});
+document.getElementById('away-name').addEventListener('input', function() {
+  document.getElementById('away-name-display').textContent = this.value || 'Away team';
+  document.getElementById('away-result-label').textContent = (this.value || 'Away') + ' win';
+});
+
+function runModel() {
+  const homeLambda = parseFloat(document.getElementById('home-xg').value);
+  const awayLambda = parseFloat(document.getElementById('away-xg').value);
+  const homeOdds = parseFloat(document.getElementById('home-odds').value);
+  const awayOdds = parseFloat(document.getElementById('away-odds').value);
+  const drawOdds = parseFloat(document.getElementById('draw-odds').value);
+  const minEdge = parseFloat(document.getElementById('min-edge').value) / 100;
+  const homeName = document.getElementById('home-name').value || 'Home';
+  const awayName = document.getElementById('away-name').value || 'Away';
+
+  const maxGoals = 6;
+  let homeWin = 0, awayWin = 0, draw = 0;
+  const grid = [];
+  const scorelines = [];
+
+  for (let h = 0; h <= maxGoals; h++) {
+    grid[h] = [];
+    for (let a = 0; a <= maxGoals; a++) {
+      const p = poisson(homeLambda, h) * poisson(awayLambda, a);
+      grid[h][a] = p;
+      scorelines.push({ h, a, p });
+      if (h > a) homeWin += p;
+      else if (a > h) awayWin += p;
+      else draw += p;
+    }
+  }
+
+  const total = homeWin + awayWin + draw;
+  homeWin /= total; awayWin /= total; draw /= total;
+
+  document.getElementById('home-prob').textContent = (homeWin * 100).toFixed(1) + '%';
+  document.getElementById('draw-prob').textContent = (draw * 100).toFixed(1) + '%';
+  document.getElementById('away-prob').textContent = (awayWin * 100).toFixed(1) + '%';
+  document.getElementById('home-result-label').textContent = homeName + ' win';
+  document.getElementById('away-result-label').textContent = awayName + ' win';
+
+  const homeImpl = oddsToImplied(homeOdds);
+  const awayImpl = oddsToImplied(awayOdds);
+  const drawImpl = oddsToImplied(drawOdds);
+
+  document.getElementById('home-implied').textContent = 'Implied: ' + (homeImpl * 100).toFixed(1) + '%';
+  document.getElementById('draw-implied').textContent = 'Implied: ' + (drawImpl * 100).toFixed(1) + '%';
+  document.getElementById('away-implied').textContent = 'Implied: ' + (awayImpl * 100).toFixed(1) + '%';
+
+  function badge(modelP, impliedP) {
+    const edge = modelP - impliedP;
+    if (edge >= minEdge) return ['value-yes', '+' + (edge * 100).toFixed(1) + '% value'];
+    if (edge <= -minEdge) return ['value-no', 'overpriced'];
+    return ['value-neu', 'fair'];
+  }
+
+  const [hClass, hText] = badge(homeWin, homeImpl);
+  const [dClass, dText] = badge(draw, drawImpl);
+  const [aClass, aText] = badge(awayWin, awayImpl);
+
+  function setBadge(id, cls, text) {
+    const el = document.getElementById(id);
+    el.className = 'value-badge ' + cls;
+    el.textContent = text;
+  }
+  setBadge('home-badge', hClass, hText);
+  setBadge('draw-badge', dClass, dText);
+  setBadge('away-badge', aClass, aText);
+
+  scorelines.sort((a, b) => b.p - a.p);
+  const top8 = scorelines.slice(0, 8);
+  const maxP = top8[0].p;
+
+  const colors = {
+    home: '#0C447C',
+    away: '#A32D2D',
+    draw: '#3B6D11'
+  };
+
+  let barsHtml = '';
+  top8.forEach(s => {
+    const outcome = s.h > s.a ? 'home' : s.a > s.h ? 'away' : 'draw';
+    const color = colors[outcome];
+    const pct = (s.p * 100).toFixed(1);
+    const barW = Math.round((s.p / maxP) * 100);
+    barsHtml += `<div class="chart-bar-row">
+      <div class="chart-bar-label">${s.h} – ${s.a}</div>
+      <div class="chart-bar-track">
+        <div class="chart-bar-fill" style="width:${barW}%;background:${color};color:#fff;">${pct}%</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('scoreline-bars').innerHTML = barsHtml;
+
+  const maxCell = Math.max(...scorelines.map(s => s.p));
+  let matrixHtml = '<div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:6px;">' + homeName + ' goals (rows) vs ' + awayName + ' goals (cols)</div>';
+  matrixHtml += '<div style="display:grid;grid-template-columns:20px repeat(7,1fr);gap:3px;">';
+  matrixHtml += '<div></div>';
+  for (let a = 0; a <= maxGoals; a++) {
+    matrixHtml += `<div style="font-size:10px;color:var(--color-text-tertiary);text-align:center;font-weight:500;">${a}</div>`;
+  }
+  for (let h = 0; h <= maxGoals; h++) {
+    matrixHtml += `<div style="font-size:10px;color:var(--color-text-tertiary);display:flex;align-items:center;justify-content:center;font-weight:500;">${h}</div>`;
+    for (let a = 0; a <= maxGoals; a++) {
+      const p = grid[h][a];
+      const intensity = clamp(p / maxCell, 0, 1);
+      let bg, textCol;
+      if (h > a) {
+        const b = Math.round(12 + intensity * 100);
+        bg = `rgba(24,95,165,${(0.1 + intensity * 0.9).toFixed(2)})`;
+        textCol = intensity > 0.5 ? '#E6F1FB' : '#185FA5';
+      } else if (a > h) {
+        bg = `rgba(163,45,45,${(0.1 + intensity * 0.9).toFixed(2)})`;
+        textCol = intensity > 0.5 ? '#FCEBEB' : '#A32D2D';
+      } else {
+        bg = `rgba(59,109,17,${(0.1 + intensity * 0.9).toFixed(2)})`;
+        textCol = intensity > 0.5 ? '#EAF3DE' : '#3B6D11';
+      }
+      matrixHtml += `<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:4px;background:${bg};font-size:9px;font-weight:500;color:${textCol};">${(p*100).toFixed(1)}</div>`;
+    }
+  }
+  matrixHtml += '</div>';
+  matrixHtml += '<div style="display:flex;gap:16px;margin-top:8px;font-size:10px;color:var(--color-text-secondary);">';
+  matrixHtml += `<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(24,95,165,0.7);display:inline-block;"></span>${homeName} win</span>`;
+  matrixHtml += `<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(163,45,45,0.7);display:inline-block;"></span>${awayName} win</span>`;
+  matrixHtml += `<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(59,109,17,0.7);display:inline-block;"></span>Draw</span>`;
+  matrixHtml += '</div>';
+  document.getElementById('matrix-container').innerHTML = matrixHtml;
+
+  function edgeRow(market, modelP, impliedP) {
+    const edge = modelP - impliedP;
+    const edgePct = (edge * 100).toFixed(1);
+    const verdict = edge >= minEdge ? '<span class="positive">✓ value</span>' : edge <= -minEdge ? '<span class="negative">overpriced</span>' : 'fair';
+    const edgeStr = edge >= 0 ? `<span class="positive">+${edgePct}%</span>` : `<span class="negative">${edgePct}%</span>`;
+    return `<tr><td>${market}</td><td>${(modelP*100).toFixed(1)}%</td><td>${(impliedP*100).toFixed(1)}%</td><td>${edgeStr}</td><td>${verdict}</td></tr>`;
+  }
+
+  document.getElementById('edge-tbody').innerHTML =
+    edgeRow(homeName + ' win', homeWin, homeImpl) +
+    edgeRow('Draw', draw, drawImpl) +
+    edgeRow(awayName + ' win', awayWin, awayImpl);
+}
+
+runModel();
+</script>
