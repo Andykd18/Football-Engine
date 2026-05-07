@@ -302,4 +302,4 @@ def api_match():
 if __name__ == "__main__":
     print("\n  Pricing Engine server starting...")
     print("  Open http://localhost:5000 in your browser\n")
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
