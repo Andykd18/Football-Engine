@@ -3,7 +3,6 @@ Pricing Engine — Flask Backend
 Serves xG data from API-Football and match odds from The Odds API.
 """
 
-import json
 import time
 import os
 import requests
@@ -14,18 +13,13 @@ app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app, origins="*")
 
 # ── Config ──────────────────────────────────────────────
-ODDS_API_KEY    = os.environ.get("ODDS_API_KEY", "")
-RAPIDAPI_KEY    = os.environ.get("RAPIDAPI_KEY", "")
-ODDS_API_BASE   = "https://api.the-odds-api.com/v4"
+ODDS_API_KEY     = os.environ.get("ODDS_API_KEY", "")
+RAPIDAPI_KEY     = os.environ.get("RAPIDAPI_KEY", "")
+ODDS_API_BASE    = "https://api.the-odds-api.com/v4"
 APIFOOTBALL_BASE = "https://v3.football.api-sports.io"
+EPL_LEAGUE_ID    = 39
+SEASON           = 2024
 
-# Premier League ID on API-Football
-EPL_LEAGUE_ID = 39
-
-# ── Team name maps ───────────────────────────────────────
-
-# API-Football team IDs for Premier League 2024-25
-# These are the official IDs used by API-Football
 APIFOOTBALL_TEAM_IDS = {
     "Arsenal":            42,
     "Aston Villa":        66,
@@ -73,12 +67,8 @@ ODDS_TEAM_MAP = {
 }
 
 
-# ── xG scraper via API-Football ──────────────────────────
-
-def _apifootball_headers():
-    return {
-        "x-apisports-key": RAPIDAPI_KEY,
-    }
+def _headers():
+    return {"x-apisports-key": RAPIDAPI_KEY}
 
 
 def get_team_xg(team_name, last_n=10):
@@ -89,20 +79,19 @@ def get_team_xg(team_name, last_n=10):
     if not team_id:
         raise ValueError(f"Team '{team_name}' not found in team ID map.")
 
-    # Fetch last N fixtures for the team in EPL 2024-25 season
-    url = f"{APIFOOTBALL_BASE}/fixtures"
-    params = {
-        "team":   team_id,
-        "league": EPL_LEAGUE_ID,
-        "season": 2024,
-        "last":   last_n,
-    }
+    # Try current season first, fall back to previous
+    for season in [2024, 2023]:
+        resp = requests.get(
+            f"{APIFOOTBALL_BASE}/fixtures",
+            headers=_headers(),
+            params={"team": team_id, "league": EPL_LEAGUE_ID, "season": season, "last": last_n},
+            timeout=15
+        )
+        resp.raise_for_status()
+        fixtures = resp.json().get("response", [])
+        if fixtures:
+            break
 
-    resp = requests.get(url, headers=_apifootball_headers(), params=params, timeout=15)
-    resp.raise_for_status()
-    data = resp.json()
-
-    fixtures = data.get("response", [])
     if not fixtures:
         raise ValueError(f"No fixtures found for {team_name} in API-Football.")
 
@@ -110,65 +99,40 @@ def get_team_xg(team_name, last_n=10):
     xg_against_vals = []
 
     for fixture in fixtures:
-        teams    = fixture.get("teams", {})
-        score    = fixture.get("score", {})
-        goals    = fixture.get("goals", {})
-
-        is_home = teams.get("home", {}).get("id") == team_id
-
-        # API-Football provides xG in the statistics endpoint
-        # Use goals as fallback if xG not available
         fixture_id = fixture.get("fixture", {}).get("id")
+        teams      = fixture.get("teams", {})
+        is_home    = teams.get("home", {}).get("id") == team_id
 
-        # Get statistics for this fixture
-        stats_url = f"{APIFOOTBALL_BASE}/fixtures/statistics"
         stats_resp = requests.get(
-            stats_url,
-            headers=_apifootball_headers(),
-            params={"fixture": fixture_id, "team": team_id},
-            timeout=15
-        )
-        stats_data = stats_resp.json().get("response", [])
-
-        xg_for = None
-        xg_against = None
-
-        if stats_data:
-            stats = stats_data[0].get("statistics", [])
-            for stat in stats:
-                if stat.get("type") == "Expected Goals":
-                    val = stat.get("value")
-                    xg_for = float(val) if val and val != "None" else None
-                    break
-
-        # If no xG data, skip this fixture
-        if xg_for is None:
-            continue
-
-        # Get opponent xG
-        opp_stats_resp = requests.get(
-            stats_url,
-            headers=_apifootball_headers(),
+            f"{APIFOOTBALL_BASE}/fixtures/statistics",
+            headers=_headers(),
             params={"fixture": fixture_id},
             timeout=15
         )
-        opp_data = opp_stats_resp.json().get("response", [])
-        for team_stats in opp_data:
-            if team_stats.get("team", {}).get("id") != team_id:
-                for stat in team_stats.get("statistics", []):
-                    if stat.get("type") == "Expected Goals":
-                        val = stat.get("value")
-                        xg_against = float(val) if val and val != "None" else None
-                        break
+        all_stats = stats_resp.json().get("response", [])
 
-        if xg_for is not None and xg_against is not None:
-            xg_for_vals.append(xg_for)
-            xg_against_vals.append(xg_against)
+        team_xg = None
+        opp_xg  = None
 
-        time.sleep(0.3)  # Rate limit: 100 req/day on free tier
+        for team_stats in all_stats:
+            tid = team_stats.get("team", {}).get("id")
+            for stat in team_stats.get("statistics", []):
+                if stat.get("type") == "Expected Goals":
+                    val = stat.get("value")
+                    xg_val = float(val) if val and val not in (None, "None", "") else None
+                    if tid == team_id:
+                        team_xg = xg_val
+                    else:
+                        opp_xg = xg_val
+
+        if team_xg is not None and opp_xg is not None:
+            xg_for_vals.append(team_xg)
+            xg_against_vals.append(opp_xg)
+
+        time.sleep(0.3)
 
     if not xg_for_vals:
-        raise ValueError(f"No xG data available for {team_name} — may not be in API-Football free tier.")
+        raise ValueError(f"No xG data found for {team_name} — API-Football may not have xG on free tier.")
 
     return {
         "team":         team_name,
@@ -177,8 +141,6 @@ def get_team_xg(team_name, last_n=10):
         "matches_used": len(xg_for_vals),
     }
 
-
-# ── Odds API ─────────────────────────────────────────────
 
 def get_match_odds(home_team, away_team):
     if not ODDS_API_KEY:
@@ -246,21 +208,49 @@ def index():
 
 @app.route("/api/debug")
 def api_debug():
-    """Test API-Football connection and check xG availability."""
     if not RAPIDAPI_KEY:
-        return jsonify({"error": "RAPIDAPI_KEY not set in Railway Variables."})
+        return jsonify({"error": "RAPIDAPI_KEY not set."})
     try:
-        # Just check the API status endpoint
-        resp = requests.get(
+        # Check account status
+        status_resp = requests.get(
             f"{APIFOOTBALL_BASE}/status",
-            headers=_apifootball_headers(),
+            headers=_headers(),
             timeout=10
         )
-        data = resp.json()
+        status_data = status_resp.json().get("response", {})
+
+        # Check Arsenal fixtures for 2024 season
+        fix_resp = requests.get(
+            f"{APIFOOTBALL_BASE}/fixtures",
+            headers=_headers(),
+            params={"team": 42, "league": EPL_LEAGUE_ID, "season": 2024, "last": 3},
+            timeout=15
+        )
+        fixtures = fix_resp.json().get("response", [])
+        fix_count = len(fixtures)
+        first_fix = fixtures[0].get("fixture", {}).get("id") if fixtures else None
+
+        # Check if xG is available in first fixture
+        xg_available = False
+        if first_fix:
+            stats_resp = requests.get(
+                f"{APIFOOTBALL_BASE}/fixtures/statistics",
+                headers=_headers(),
+                params={"fixture": first_fix},
+                timeout=15
+            )
+            all_stats = stats_resp.json().get("response", [])
+            for team_stats in all_stats:
+                for stat in team_stats.get("statistics", []):
+                    if stat.get("type") == "Expected Goals":
+                        xg_available = True
+
         return jsonify({
-            "status":          resp.status_code,
-            "account":         data.get("response", {}).get("subscription", {}),
-            "requests_left":   data.get("response", {}).get("requests", {}),
+            "account":       status_data.get("subscription", {}),
+            "requests":      status_data.get("requests", {}),
+            "arsenal_fixtures_found": fix_count,
+            "xg_available":  xg_available,
+            "first_fixture_id": first_fix,
         })
     except Exception as e:
         return jsonify({"error": str(e)})
