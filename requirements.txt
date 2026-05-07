@@ -1,6 +1,4 @@
 flask
 flask-cors
 requests
-aiohttp
-aiohttp==3.9.5
 gunicorn
