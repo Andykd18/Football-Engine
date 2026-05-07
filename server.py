@@ -14,16 +14,15 @@ Then open index.html in your browser (or visit http://localhost:5000)
 import re
 import json
 import time
-import os
 import requests
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder=".", static_url_path="")
-CORS(app, origins="*")
-ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
+CORS(app)
 
 # ── Config ──────────────────────────────────────────────
+ODDS_API_KEY = "YOUR_API_KEY_HERE"   # Get free key at: https://the-odds-api.com
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 UNDERSTAT_BASE = "https://understat.com"
 
@@ -31,9 +30,18 @@ HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/120.0.0.0 Safari/537.36"
+        "Chrome/124.0.0.0 Safari/537.36"
     ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     "Accept-Language": "en-GB,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Cache-Control": "max-age=0",
     "Referer": "https://www.google.com/",
 }
 
@@ -107,9 +115,18 @@ def get_team_xg(team_name: str, season: int = 2025, last_n: int = 10):
     understat_name = UNDERSTAT_TEAM_MAP.get(team_name, team_name)
     url = f"{UNDERSTAT_BASE}/league/EPL/{season}"
 
-    time.sleep(1)
-    resp = requests.get(url, headers=HEADERS, timeout=20)
+    time.sleep(2)
+    session = requests.Session()
+    session.headers.update(HEADERS)
+    resp = session.get(url, timeout=30)
+    
+    if resp.status_code == 403:
+        raise ValueError("Understat is blocking the request (403). Try again in a moment.")
     resp.raise_for_status()
+
+    # Check we got actual HTML not a block page
+    if "teamsData" not in resp.text:
+        raise ValueError("Understat returned unexpected content — may be blocking cloud requests.")
 
     teams_data = _extract_json_var(resp.text, "teamsData")
     if not teams_data:
@@ -209,7 +226,8 @@ def get_match_odds(home_team: str, away_team: str):
 
 @app.route("/")
 def index():
-    return "OK", 200
+    return app.send_static_file("index.html")
+
 
 @app.route("/api/xg")
 def api_xg():
@@ -302,4 +320,4 @@ def api_match():
 if __name__ == "__main__":
     print("\n  Pricing Engine server starting...")
     print("  Open http://localhost:5000 in your browser\n")
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    app.run(debug=True, port=5000)
