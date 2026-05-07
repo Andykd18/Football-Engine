@@ -22,7 +22,7 @@ app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
 
 # ── Config ──────────────────────────────────────────────
-ODDS_API_KEY = "YOUR_API_KEY_HERE"   # Get free key at: https://the-odds-api.com
+ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 UNDERSTAT_BASE = "https://understat.com"
 
@@ -320,4 +320,4 @@ def api_match():
 if __name__ == "__main__":
     print("\n  Pricing Engine server starting...")
     print("  Open http://localhost:5000 in your browser\n")
-    app.run(debug=True, port=5000)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
