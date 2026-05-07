@@ -133,7 +133,7 @@ def _get_csv_data():
     if _CSV_CACHE["data"] and (now - _CSV_CACHE["fetched_at"]) < CSV_CACHE_TTL:
         return _CSV_CACHE["data"]
     
-    url = "https://www.football-data.co.uk/mmz4281/2425/E0.csv"
+    url = "https://www.football-data.co.uk/mmz4281/2526/E0.csv"
     resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
     resp.raise_for_status()
     
