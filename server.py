@@ -14,6 +14,7 @@ Then open index.html in your browser (or visit http://localhost:5000)
 import re
 import json
 import time
+import os
 import io
 import csv as csvlib
 import requests
@@ -24,7 +25,7 @@ app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
 
 # ── Config ──────────────────────────────────────────────
-ODDS_API_KEY = "YOUR_API_KEY_HERE"   # Get free key at: https://the-odds-api.com
+ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 UNDERSTAT_BASE = "https://understat.com"
 
@@ -66,7 +67,7 @@ UNDERSTAT_TEAM_MAP = {
     "Newcastle United":   "Newcastle United",
     "Nottingham Forest":  "Nottingham Forest",
     "Sunderland":         "Sunderland",
-    "Tottenham":          "Tottenham",
+    "Tottenham":          "Spurs",
     "West Ham":           "West Ham",
     "Wolverhampton":      "Wolverhampton Wanderers",
 }
@@ -117,7 +118,7 @@ FDOTUK_TEAM_MAP = {
     "Newcastle United":   "Newcastle",
     "Nottingham Forest":  "Nott'm Forest",
     "Sunderland":         "Sunderland",
-    "Tottenham":          "Tottenham",
+    "Tottenham":          "Spurs",
     "West Ham":           "West Ham",
     "Wolverhampton":      "Wolves",
 }
@@ -345,4 +346,4 @@ def api_match():
 if __name__ == "__main__":
     print("\n  Pricing Engine server starting...")
     print("  Open http://localhost:5000 in your browser\n")
-    app.run(debug=True, port=5000)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
