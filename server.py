@@ -214,13 +214,15 @@ def api_debug():
     url = f"http://api.scraperapi.com?api_key={scraper_key}&url={target_url}&render=true"
     try:
         resp = requests.get(url, headers=HEADERS, timeout=60)
+        idx = resp.text.find("JSON.parse")
+        snippet = resp.text[max(0, idx - 50):idx + 150] if idx >= 0 else "not found"
         return jsonify({
-            "status":            resp.status_code,
-            "has_teamsData":     "teamsData" in resp.text,
-            "has_JSON_parse":    "JSON.parse" in resp.text,
-            "has_var_teamsData": "var teamsData" in resp.text,
-            "content_length":    len(resp.text),
-            "first_200":         resp.text[:200],
+            "status":             resp.status_code,
+            "has_teamsData":      "teamsData" in resp.text,
+            "has_JSON_parse":     "JSON.parse" in resp.text,
+            "has_var_teamsData":  "var teamsData" in resp.text,
+            "content_length":     len(resp.text),
+            "json_parse_snippet": snippet,
         })
     except Exception as e:
         return jsonify({"error": str(e)})
