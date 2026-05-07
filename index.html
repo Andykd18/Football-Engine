@@ -245,23 +245,56 @@
     accent-color: var(--blue-text);
   }
 
-  .calc-btn {
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .calc-btn, .fetch-btn {
     width: 100%;
     padding: 11px;
     font-size: 14px;
     font-weight: 500;
     font-family: inherit;
     cursor: pointer;
-    background: var(--text);
-    color: var(--bg);
     border: none;
     border-radius: var(--radius-sm);
-    margin-bottom: 1.5rem;
     transition: opacity .15s;
   }
 
+  .calc-btn {
+    background: var(--text);
+    color: var(--bg);
+  }
+
+  .fetch-btn {
+    background: var(--blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+
+  .fetch-btn:hover { opacity: .85; }
+  .fetch-btn:active { opacity: .7; }
   .calc-btn:hover { opacity: .85; }
   .calc-btn:active { opacity: .7; }
+
+  .fetch-btn.loading { opacity: .6; cursor: wait; }
+
+  .fetch-status {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-bottom: 1rem;
+    min-height: 16px;
+    text-align: center;
+  }
+
+  .fetch-status.ok  { color: var(--green-text); }
+  .fetch-status.err { color: var(--red-text); }
 
   .section-title {
     font-size: 11px;
@@ -329,6 +362,161 @@
 
   .draw-input:focus { border-color: var(--blue-text); }
   .draw-input.invalid { border-color: var(--red-text); }
+
+  /* ── History ── */
+  .history-wrap {
+    margin-top: 2rem;
+    border-top: 0.5px solid var(--border);
+    padding-top: 1.5rem;
+  }
+
+  .history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .clear-btn {
+    font-size: 11px;
+    color: var(--text-3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .clear-btn:hover { color: var(--red-text); }
+
+  .history-empty {
+    font-size: 12px;
+    color: var(--text-3);
+    padding: 1rem 0;
+  }
+
+  .history-item {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+
+  .history-item:hover { border-color: var(--border-mid); }
+
+  .history-match {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .history-time {
+    font-size: 10px;
+    color: var(--text-3);
+    font-weight: 400;
+  }
+
+  .history-stats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .hstat {
+    font-size: 11px;
+    color: var(--text-2);
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .hstat.val  { background: var(--green-light); color: var(--green-text); }
+  .hstat.over { background: var(--red-light);   color: var(--red-text); }
+
+  /* ── Acca builder ── */
+  .acca-wrap {
+    margin-top: 1.5rem;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    display: none;
+  }
+
+  .acca-wrap.visible { display: block; }
+
+  .acca-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .acca-header h3 { font-size: 13px; font-weight: 500; }
+
+  .acca-legs { margin-bottom: 12px; }
+
+  .acca-leg {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 12px;
+  }
+
+  .acca-leg:last-child { border-bottom: none; }
+
+  .acca-leg-match { flex: 1; color: var(--text-2); }
+  .acca-leg-sel   { font-weight: 500; color: var(--text); min-width: 80px; }
+  .acca-leg-odds  { color: var(--blue-text); min-width: 40px; text-align: right; }
+
+  .acca-leg-remove {
+    background: none;
+    border: none;
+    color: var(--text-3);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+    line-height: 1;
+  }
+
+  .acca-leg-remove:hover { color: var(--red-text); }
+
+  .acca-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .acca-total-odds {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--blue-text);
+  }
+
+  .acca-meta { font-size: 11px; color: var(--text-3); }
+
+  .acca-add-btn {
+    font-size: 11px;
+    background: var(--surface);
+    border: 0.5px solid var(--border-mid);
+    border-radius: 4px;
+    color: var(--text-2);
+    cursor: pointer;
+    padding: 3px 8px;
+    font-family: inherit;
+  }
+
+  .acca-add-btn:hover { color: var(--text); }
 </style>
 </head>
 <body>
@@ -387,7 +575,13 @@
     </div>
   </div>
 
-  <button class="calc-btn" onclick="run()">Calculate</button>
+  <div class="btn-row">
+    <button class="fetch-btn" id="fetch-btn" onclick="fetchData()">
+      ↓ Fetch xG &amp; odds
+    </button>
+    <button class="calc-btn" onclick="run()">Calculate</button>
+  </div>
+  <div class="fetch-status" id="fetch-status"></div>
 
   <div class="section-title">Outcome probabilities</div>
   <div class="outcomes">
@@ -423,6 +617,34 @@
   </div>
   <div id="matrix"></div>
   <div class="matrix-legend" id="legend"></div>
+
+  <!-- History -->
+  <div class="history-wrap" id="history-wrap">
+    <div class="history-header">
+      <div class="section-title" style="margin-bottom:0">Search history</div>
+      <button class="clear-btn" onclick="clearHistory()">Clear all</button>
+    </div>
+    <div id="history-list"><div class="history-empty">No searches yet — run a calculation to save it here.</div></div>
+  </div>
+
+  <!-- Acca builder -->
+  <div class="acca-wrap" id="acca-wrap">
+    <div class="acca-header">
+      <h3>Acca builder</h3>
+      <span class="acca-meta" id="acca-meta">0 legs</span>
+    </div>
+    <div class="acca-legs" id="acca-legs"></div>
+    <div class="acca-result">
+      <div>
+        <div class="acca-meta">Combined odds</div>
+        <div class="acca-total-odds" id="acca-total">—</div>
+      </div>
+      <div>
+        <div class="acca-meta" style="margin-bottom:4px">Implied prob</div>
+        <div style="font-size:13px;font-weight:500" id="acca-prob">—</div>
+      </div>
+    </div>
+  </div>
 
 </div>
 <script>
@@ -462,6 +684,65 @@ function swap() {
   $('hodds').value = ao; $('aodds').value = ho;
   updateTitle(); run();
 }
+
+// ── Backend fetch ────────────────────────────────────────
+
+const SERVER = "http://localhost:5000";
+
+async function fetchData() {
+  const home = $('hteam').value;
+  const away = $('ateam').value;
+  const btn  = $('fetch-btn');
+  const status = $('fetch-status');
+
+  btn.classList.add('loading');
+  btn.textContent = 'Fetching...';
+  status.className = 'fetch-status';
+  status.textContent = 'Contacting server...';
+
+  try {
+    const res = await fetch(`${SERVER}/api/match?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}`);
+    const data = await res.json();
+
+    let msgs = [];
+
+    // xG
+    if (data.xg && !data.xg.error) {
+      $('hxg').value = data.xg.home_lambda;
+      $('axg').value = data.xg.away_lambda;
+      msgs.push(`xG loaded (last ${data.xg.home.matches_used} matches)`);
+    } else if (data.xg?.error) {
+      msgs.push(`xG: ${data.xg.error}`);
+    }
+
+    // Odds
+    if (data.odds && !data.odds.error) {
+      $('hodds').value = data.odds.home_odds?.toFixed(2) ?? $('hodds').value;
+      $('dodds').value = data.odds.draw_odds?.toFixed(2) ?? $('dodds').value;
+      $('aodds').value = data.odds.away_odds?.toFixed(2) ?? $('aodds').value;
+      updateHint('hodds', 'hodds-hint');
+      updateHint('dodds', 'dodds-hint');
+      updateHint('aodds', 'aodds-hint');
+      msgs.push(`odds from ${data.odds.bookmaker}`);
+    } else if (data.odds?.error) {
+      msgs.push(`odds: ${data.odds.error}`);
+    }
+
+    const allOk = msgs.every(m => !m.toLowerCase().includes('error') && !m.toLowerCase().includes('not found'));
+    status.className = 'fetch-status ' + (allOk ? 'ok' : 'err');
+    status.textContent = msgs.join(' · ');
+    run();
+
+  } catch (e) {
+    status.className = 'fetch-status err';
+    status.textContent = 'Server not running — start server.py first (python server.py)';
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '↓ Fetch xG & odds';
+  }
+}
+
+// ── End backend fetch ─────────────────────────────────────
 
 function parseOdds(val) {
   val = val.trim();
@@ -593,13 +874,161 @@ function run() {
     <div class="leg-item"><div class="leg-dot" style="background:#185FA5"></div>${hName} win</div>
     <div class="leg-item"><div class="leg-dot" style="background:#3B6D11"></div>Draw</div>
     <div class="leg-item"><div class="leg-dot" style="background:#A32D2D"></div>${aName} win</div>`;
+
+  // Save to history
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) +
+                  ' · ' + now.toLocaleDateString([], {day:'numeric', month:'short'});
+  saveHistory({
+    home: hName, away: aName,
+    hxg: $('hxg').value, axg: $('axg').value,
+    hodds: $('hodds').value, dodds: $('dodds').value, aodds: $('aodds').value,
+    hProb: hw, dProb: dr, aProb: aw,
+    hImp: himp, dImp: dimp, aImp: aimp,
+    minEdge, time: timeStr,
+  });
 }
+
+// ── History & Acca ───────────────────────────────────────
+
+let history = JSON.parse(localStorage.getItem('pe_history') || '[]');
+let acca = JSON.parse(localStorage.getItem('pe_acca') || '[]');
+
+function saveHistory(entry) {
+  history.unshift(entry);
+  if (history.length > 20) history = history.slice(0, 20);
+  localStorage.setItem('pe_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function clearHistory() {
+  history = []; acca = [];
+  localStorage.removeItem('pe_history');
+  localStorage.removeItem('pe_acca');
+  renderHistory();
+  renderAcca();
+}
+
+function loadFromHistory(entry) {
+  // Set teams
+  $('hteam').value = entry.home;
+  $('ateam').value = entry.away;
+  $('hxg').value   = entry.hxg;
+  $('axg').value   = entry.axg;
+  $('hodds').value = entry.hodds;
+  $('dodds').value = entry.dodds;
+  $('aodds').value = entry.aodds;
+  updateTitle();
+  updateHint('hodds','hodds-hint');
+  updateHint('dodds','dodds-hint');
+  updateHint('aodds','aodds-hint');
+  run();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function addToAcca(entry, selection, odds) {
+  // Prevent duplicate matches
+  if (acca.find(l => l.home === entry.home && l.away === entry.away)) {
+    // Replace existing leg for same match
+    acca = acca.filter(l => !(l.home === entry.home && l.away === entry.away));
+  }
+  acca.push({ home: entry.home, away: entry.away, selection, odds });
+  localStorage.setItem('pe_acca', JSON.stringify(acca));
+  renderAcca();
+}
+
+function removeAccaLeg(idx) {
+  acca.splice(idx, 1);
+  localStorage.setItem('pe_acca', JSON.stringify(acca));
+  renderAcca();
+}
+
+function renderAcca() {
+  const wrap = $('acca-wrap');
+  const legsEl = $('acca-legs');
+  const metaEl = $('acca-meta');
+  const totalEl = $('acca-total');
+  const probEl  = $('acca-prob');
+
+  if (acca.length === 0) {
+    wrap.classList.remove('visible');
+    return;
+  }
+
+  wrap.classList.add('visible');
+  metaEl.textContent = acca.length + (acca.length === 1 ? ' leg' : ' legs');
+
+  legsEl.innerHTML = acca.map((leg, i) => `
+    <div class="acca-leg">
+      <div class="acca-leg-match">${leg.home} vs ${leg.away}</div>
+      <div class="acca-leg-sel">${leg.selection}</div>
+      <div class="acca-leg-odds">${leg.odds.toFixed(2)}</div>
+      <button class="acca-leg-remove" onclick="removeAccaLeg(${i})">×</button>
+    </div>
+  `).join('');
+
+  const combined = acca.reduce((acc, leg) => acc * leg.odds, 1);
+  const impliedPct = (1 / combined * 100).toFixed(1);
+  totalEl.textContent = combined.toFixed(2);
+  probEl.textContent  = impliedPct + '%';
+}
+
+function renderHistory() {
+  const list = $('history-list');
+  if (history.length === 0) {
+    list.innerHTML = '<div class="history-empty">No searches yet — run a calculation to save it here.</div>';
+    return;
+  }
+
+  list.innerHTML = history.map((e, i) => {
+    const hEdge = ((e.hProb - e.hImp) * 100).toFixed(1);
+    const dEdge = ((e.dProb - e.dImp) * 100).toFixed(1);
+    const aEdge = ((e.aProb - e.aImp) * 100).toFixed(1);
+
+    function edgeClass(edge) {
+      return parseFloat(edge) >= e.minEdge * 100 ? 'val' : parseFloat(edge) <= -e.minEdge * 100 ? 'over' : '';
+    }
+
+    const hClass = edgeClass(hEdge);
+    const dClass = edgeClass(dEdge);
+    const aClass = edgeClass(aEdge);
+
+    const hLabel = e.home + ' win';
+    const dLabel = 'Draw';
+    const aLabel = e.away + ' win';
+
+    return `<div class="history-item" onclick="loadFromHistory(history[${i}])">
+      <div class="history-match">
+        <span>${e.home} vs ${e.away}</span>
+        <span class="history-time">${e.time}</span>
+      </div>
+      <div class="history-stats">
+        <span class="hstat ${hClass}">
+          ${hLabel} ${(e.hProb*100).toFixed(1)}%
+          <button class="acca-add-btn" onclick="event.stopPropagation(); addToAcca(history[${i}], '${hLabel}', ${parseOdds(e.hodds).toFixed(4)})">+ acca</button>
+        </span>
+        <span class="hstat ${dClass}">
+          ${dLabel} ${(e.dProb*100).toFixed(1)}%
+          <button class="acca-add-btn" onclick="event.stopPropagation(); addToAcca(history[${i}], '${dLabel}', ${parseOdds(e.dodds).toFixed(4)})">+ acca</button>
+        </span>
+        <span class="hstat ${aClass}">
+          ${aLabel} ${(e.aProb*100).toFixed(1)}%
+          <button class="acca-add-btn" onclick="event.stopPropagation(); addToAcca(history[${i}], '${aLabel}', ${parseOdds(e.aodds).toFixed(4)})">+ acca</button>
+        </span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── End History & Acca ────────────────────────────────────
 
 buildDropdowns();
 updateTitle();
 updateHint('hodds', 'hodds-hint');
 updateHint('dodds', 'dodds-hint');
 updateHint('aodds', 'aodds-hint');
+renderHistory();
+renderAcca();
 run();
 </script>
 </body>
