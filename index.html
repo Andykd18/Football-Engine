@@ -536,6 +536,11 @@
         <input type="number" id="hxg" value="1.70" step="0.01" min="0.10" max="5.00">
         <div class="xg-unit">xG / match</div>
       </div>
+      <div class="field-label" style="margin-top:4px">xG against per match</div>
+      <div class="xg-input-wrap">
+        <input type="number" id="hxga" value="1.20" step="0.01" min="0.10" max="5.00">
+        <div class="xg-unit">xGA / match</div>
+      </div>
       <div class="odds-label">Win odds</div>
       <input class="odds-input" type="text" id="hodds" value="14/5" placeholder="e.g. 4/5 or 1.80">
       <div class="odds-hint" id="hodds-hint">= 3.80</div>
@@ -558,6 +563,11 @@
       <div class="xg-input-wrap">
         <input type="number" id="axg" value="1.45" step="0.01" min="0.10" max="5.00">
         <div class="xg-unit">xG / match</div>
+      </div>
+      <div class="field-label" style="margin-top:4px">xG against per match</div>
+      <div class="xg-input-wrap">
+        <input type="number" id="axga" value="1.50" step="0.01" min="0.10" max="5.00">
+        <div class="xg-unit">xGA / match</div>
       </div>
       <div class="odds-label">Win odds</div>
       <input class="odds-input" type="text" id="aodds" value="4/5" placeholder="e.g. 4/5 or 1.80">
@@ -605,6 +615,39 @@
       <div class="oc-pct" id="apct">—</div>
       <div class="oc-imp" id="aimp">—</div>
       <span class="badge bf" id="abadge">—</span>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:1.5rem">Defensive &amp; market stats</div>
+  <div class="outcomes" id="def-stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">
+    <div class="oc">
+      <div class="oc-lbl">BTTS</div>
+      <div class="oc-pct" id="btts-pct">—</div>
+      <div class="oc-imp" id="btts-sub">Both teams to score</div>
+    </div>
+    <div class="oc">
+      <div class="oc-lbl">Over 2.5 goals</div>
+      <div class="oc-pct" id="o25-pct">—</div>
+      <div class="oc-imp" id="o25-sub">Total goals market</div>
+    </div>
+    <div class="oc">
+      <div class="oc-lbl">Under 2.5 goals</div>
+      <div class="oc-pct" id="u25-pct">—</div>
+      <div class="oc-imp" id="u25-sub">Total goals market</div>
+    </div>
+  </div>
+  <div class="outcomes" id="cs-stats" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
+    <div class="oc">
+      <div class="oc-bar" id="hcs-bar" style="background:var(--blue);width:0%"></div>
+      <div class="oc-lbl" id="hcs-lbl">Home clean sheet</div>
+      <div class="oc-pct" id="hcs-pct">—</div>
+      <div class="oc-imp" id="hcs-sub">—</div>
+    </div>
+    <div class="oc">
+      <div class="oc-bar" id="acs-bar" style="background:var(--red);width:0%"></div>
+      <div class="oc-lbl" id="acs-lbl">Away clean sheet</div>
+      <div class="oc-pct" id="acs-pct">—</div>
+      <div class="oc-imp" id="acs-sub">—</div>
     </div>
   </div>
 
@@ -676,12 +719,14 @@ function updateTitle() {
 }
 
 function swap() {
-  const ht = $('hteam').value, at = $('ateam').value;
-  const hx = $('hxg').value,   ax = $('axg').value;
+  const ht = $('hteam').value,  at = $('ateam').value;
+  const hx = $('hxg').value,    ax = $('axg').value;
+  const hxa = $('hxga').value,  axa = $('axga').value;
   const ho = $('hodds').value,  ao = $('aodds').value;
-  $('hteam').value = at; $('ateam').value = ht;
-  $('hxg').value   = ax; $('axg').value   = hx;
-  $('hodds').value = ao; $('aodds').value = ho;
+  $('hteam').value = at;  $('ateam').value = ht;
+  $('hxg').value   = ax;  $('axg').value   = hx;
+  $('hxga').value  = axa; $('axga').value  = hxa;
+  $('hodds').value = ao;  $('aodds').value = ho;
   updateTitle(); run();
 }
 
@@ -774,7 +819,7 @@ function updateHint(inputId, hintId) {
 
 $('edge-sl').oninput = () => { $('edge-v').textContent = $('edge-sl').value + '%'; run(); };
 $('ha').onchange = run;
-['hxg','axg'].forEach(id => $(id).addEventListener('input', run));
+['hxg','axg','hxga','axga'].forEach(id => $(id).addEventListener('input', run));
 ['hodds','dodds','aodds'].forEach(id => {
   $(id).addEventListener('input', () => {
     updateHint(id, id + '-hint');
@@ -796,9 +841,15 @@ function setBadge(el, edge, min) {
 }
 
 function run() {
-  const ha  = $('ha').checked ? 1.10 : 1.0;
-  const hl  = parseFloat($('hxg').value) * ha;
-  const al  = parseFloat($('axg').value) / ha;
+  const ha   = $('ha').checked ? 1.10 : 1.0;
+  const hxgF = parseFloat($('hxg').value)  || 1.5;
+  const axgF = parseFloat($('axg').value)  || 1.5;
+  const hxgA = parseFloat($('hxga').value) || 1.2;
+  const axgA = parseFloat($('axga').value) || 1.2;
+
+  // Blend attack vs opposition defence for more accurate lambdas
+  const hl = ((hxgF + axgA) / 2) * ha;
+  const al = ((axgF + hxgA) / 2) / ha;
   const hOdds = parseOdds($('hodds').value);
   const dOdds = parseOdds($('dodds').value);
   const aOdds = parseOdds($('aodds').value);
@@ -838,6 +889,42 @@ function run() {
   setBadge($('hbadge'), hw-himp, minEdge);
   setBadge($('dbadge'), dr-dimp, minEdge);
   setBadge($('abadge'), aw-aimp, minEdge);
+
+  // ── Defensive & market stats ──
+  // BTTS: both teams score at least 1
+  let btts = 0, o25 = 0, u25 = 0;
+  for (let h = 0; h <= MAX; h++) {
+    for (let a = 0; a <= MAX; a++) {
+      const p = grid[h][a];
+      if (h >= 1 && a >= 1) btts += p;
+      if (h + a > 2.5)      o25  += p;
+      if (h + a < 2.5)      u25  += p;
+    }
+  }
+
+  // Clean sheet: team concedes 0
+  let hCS = 0, aCS = 0;
+  for (let h = 0; h <= MAX; h++) hCS += grid[h][0]; // home keeps clean sheet (away scores 0)
+  for (let a = 0; a <= MAX; a++) aCS += grid[0][a]; // away keeps clean sheet (home scores 0)
+
+  $('btts-pct').textContent = (btts*100).toFixed(1) + '%';
+  $('o25-pct').textContent  = (o25*100).toFixed(1)  + '%';
+  $('u25-pct').textContent  = (u25*100).toFixed(1)  + '%';
+  $('btts-sub').textContent = btts > 0.55 ? 'Likely' : btts > 0.45 ? 'Marginal' : 'Unlikely';
+  $('o25-sub').textContent  = o25  > 0.55 ? 'Likely' : o25  > 0.45 ? 'Marginal' : 'Unlikely';
+  $('u25-sub').textContent  = u25  > 0.55 ? 'Likely' : u25  > 0.45 ? 'Marginal' : 'Unlikely';
+
+  $('hcs-lbl').textContent = hName + ' clean sheet';
+  $('acs-lbl').textContent = aName + ' clean sheet';
+  $('hcs-pct').textContent = (hCS*100).toFixed(1) + '%';
+  $('acs-pct').textContent = (aCS*100).toFixed(1) + '%';
+  $('hcs-bar').style.width = (hCS*100).toFixed(1) + '%';
+  $('acs-bar').style.width = (aCS*100).toFixed(1) + '%';
+
+  const hxgF2 = parseFloat($('hxg').value), hxgA2 = parseFloat($('hxga').value);
+  const axgF2 = parseFloat($('axg').value), axgA2 = parseFloat($('axga').value);
+  $('hcs-sub').textContent = `xG for ${hxgF2.toFixed(2)} · xGA ${hxgA2.toFixed(2)}`;
+  $('acs-sub').textContent = `xG for ${axgF2.toFixed(2)} · xGA ${axgA2.toFixed(2)}`;
 
   const scores = [];
   for (let h = 0; h <= MAX; h++)
