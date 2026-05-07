@@ -334,6 +334,25 @@ def api_debug():
         return jsonify({"error": str(e)})
 
 
+@app.route("/api/debug")
+def api_debug():
+    target_url = "https://understat.com/league/EPL/2025"
+    scraper_key = os.environ.get("SCRAPER_API_KEY", "")
+    url = f"http://api.scraperapi.com?api_key={scraper_key}&url={target_url}&render=true"
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=60)
+        return jsonify({
+            "status": resp.status_code,
+            "has_teamsData": "teamsData" in resp.text,
+            "has_JSON_parse": "JSON.parse" in resp.text,
+            "has_var_teamsData": "var teamsData" in resp.text,
+            "content_length": len(resp.text),
+            "first_200": resp.text[:200]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
 if __name__ == "__main__":
     print("\n  Pricing Engine server starting...")
     print("  Open http://localhost:5000 in your browser\n")
