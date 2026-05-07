@@ -115,7 +115,7 @@ def get_team_xg(team_name, last_n=10):
         for team_stats in all_stats:
             tid = team_stats.get("team", {}).get("id")
             for stat in team_stats.get("statistics", []):
-                if stat.get("type") == "Expected Goals":
+                if stat.get("type") in ("Expected Goals", "expected_goals"):
                     val = stat.get("value")
                     xg_val = float(val) if val and val not in (None, "None", "") else None
                     if tid == team_id:
