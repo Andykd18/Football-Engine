@@ -20,6 +20,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder=".", static_url_path="")
+CORS(app, origins="*")
 ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
 
 # ── Config ──────────────────────────────────────────────
