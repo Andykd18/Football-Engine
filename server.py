@@ -80,11 +80,11 @@ def get_team_xg(team_name, last_n=10):
         raise ValueError(f"Team '{team_name}' not found in team ID map.")
 
     # Try current season first, fall back to previous
-    for season in [2024, 2023]:
+    for season in [2025, 2024]:
         resp = requests.get(
             f"{APIFOOTBALL_BASE}/fixtures",
             headers=_headers(),
-            params={"team": team_id, "league": EPL_LEAGUE_ID, "season": season, "last": last_n},
+            params={"team": team_id, "league": EPL_LEAGUE_ID, "season": 2025, "last": last_n},
             timeout=15
         )
         resp.raise_for_status()
@@ -223,7 +223,7 @@ def api_debug():
         fix_resp = requests.get(
             f"{APIFOOTBALL_BASE}/fixtures",
             headers=_headers(),
-            params={"team": 42, "league": EPL_LEAGUE_ID, "season": 2024, "last": 3},
+            params={"team": 42, "league": EPL_LEAGUE_ID, "season": 2025, "last": 3},
             timeout=15
         )
         fixtures = fix_resp.json().get("response", [])
