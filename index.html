@@ -762,9 +762,9 @@ async function fetchData() {
 
     // Odds
     if (data.odds && !data.odds.error) {
-      $('hodds').value = data.odds.home_odds?.toFixed(2) ?? $('hodds').value;
-      $('dodds').value = data.odds.draw_odds?.toFixed(2) ?? $('dodds').value;
-      $('aodds').value = data.odds.away_odds?.toFixed(2) ?? $('aodds').value;
+      $('hodds').value = data.odds.home_odds ? decimalToFraction(data.odds.home_odds) : $('hodds').value;
+      $('dodds').value = data.odds.draw_odds ? decimalToFraction(data.odds.draw_odds) : $('dodds').value;
+      $('aodds').value = data.odds.away_odds ? decimalToFraction(data.odds.away_odds) : $('aodds').value;
       updateHint('hodds', 'hodds-hint');
       updateHint('dodds', 'dodds-hint');
       updateHint('aodds', 'aodds-hint');
@@ -788,6 +788,28 @@ async function fetchData() {
 }
 
 // ── End backend fetch ─────────────────────────────────────
+
+
+function decimalToFraction(decimal) {
+  // Convert decimal odds to fractional (e.g. 4.0 -> "3/1", 2.5 -> "3/2")
+  const numerator = decimal - 1;
+  // Find a good fraction representation
+  const tolerance = 0.01;
+  for (let denom = 1; denom <= 20; denom++) {
+    const num = Math.round(numerator * denom);
+    if (Math.abs(num / denom - numerator) < tolerance) {
+      // Simplify by GCD
+      const g = gcd(num, denom);
+      return `${num/g}/${denom/g}`;
+    }
+  }
+  // Fallback: round to 2 decimal places
+  return decimal.toFixed(2);
+}
+
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
 
 function parseOdds(val) {
   val = val.trim();
