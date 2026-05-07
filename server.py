@@ -19,10 +19,10 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder=".", static_url_path="")
-CORS(app)
+import os
+ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
 
 # ── Config ──────────────────────────────────────────────
-ODDS_API_KEY = "06802dd78fa6522764f5a3f26e5d0f46"   # Get free key at: https://the-odds-api.com
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 UNDERSTAT_BASE = "https://understat.com"
 
