@@ -14,7 +14,8 @@ Then open index.html in your browser (or visit http://localhost:5000)
 import re
 import json
 import time
-import os
+import io
+import csv as csvlib
 import requests
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -23,7 +24,7 @@ app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
 
 # ── Config ──────────────────────────────────────────────
-ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
+ODDS_API_KEY = "YOUR_API_KEY_HERE"   # Get free key at: https://the-odds-api.com
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 UNDERSTAT_BASE = "https://understat.com"
 
@@ -95,70 +96,93 @@ ODDS_TEAM_MAP = {
 }
 
 
-# ── Understat xG scraper ─────────────────────────────────
+# ── xG scraper (football-data.co.uk) ────────────────────
 
-def _extract_json_var(html: str, var_name: str):
-    pattern = rf"var\s+{var_name}\s*=\s*JSON\.parse\('(.+?)'\)"
-    match = re.search(pattern, html)
-    if not match:
-        return None
-    raw = match.group(1)
-    raw = raw.replace("\\'", "'")
-    try:
-        raw = raw.encode("utf-8").decode("unicode_escape")
-    except Exception:
-        pass
-    return json.loads(raw)
+# football-data.co.uk team name mapping
+FDOTUK_TEAM_MAP = {
+    "Arsenal":            "Arsenal",
+    "Aston Villa":        "Aston Villa",
+    "Bournemouth":        "Bournemouth",
+    "Brentford":          "Brentford",
+    "Brighton":           "Brighton",
+    "Burnley":            "Burnley",
+    "Chelsea":            "Chelsea",
+    "Crystal Palace":     "Crystal Palace",
+    "Everton":            "Everton",
+    "Fulham":             "Fulham",
+    "Leeds United":       "Leeds",
+    "Liverpool":          "Liverpool",
+    "Manchester City":    "Man City",
+    "Manchester United":  "Man United",
+    "Newcastle United":   "Newcastle",
+    "Nottingham Forest":  "Nott'm Forest",
+    "Sunderland":         "Sunderland",
+    "Tottenham":          "Tottenham",
+    "West Ham":           "West Ham",
+    "Wolverhampton":      "Wolves",
+}
+
+# Cache the CSV so we don't re-download every request
+_CSV_CACHE = {"data": None, "fetched_at": 0}
+CSV_CACHE_TTL = 3600  # 1 hour
+
+def _get_csv_data():
+    """Fetch and cache the football-data.co.uk CSV."""
+    now = time.time()
+    if _CSV_CACHE["data"] and (now - _CSV_CACHE["fetched_at"]) < CSV_CACHE_TTL:
+        return _CSV_CACHE["data"]
+    
+    url = "https://www.football-data.co.uk/mmz4281/2425/E0.csv"
+    resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
+    resp.raise_for_status()
+    
+    reader = csvlib.DictReader(io.StringIO(resp.text))
+    rows = list(reader)
+    _CSV_CACHE["data"] = rows
+    _CSV_CACHE["fetched_at"] = now
+    return rows
 
 
 def get_team_xg(team_name: str, season: int = 2025, last_n: int = 10):
-    """Fetch rolling average xG for a team from Understat."""
-    understat_name = UNDERSTAT_TEAM_MAP.get(team_name, team_name)
-    url = f"{UNDERSTAT_BASE}/league/EPL/{season}"
-
-    time.sleep(2)
-    session = requests.Session()
-    session.headers.update(HEADERS)
-    resp = session.get(url, timeout=30)
+    """Fetch rolling average xG for a team from football-data.co.uk."""
+    fd_name = FDOTUK_TEAM_MAP.get(team_name, team_name)
     
-    if resp.status_code == 403:
-        raise ValueError("Understat is blocking the request (403). Try again in a moment.")
-    resp.raise_for_status()
-
-    # Check we got actual HTML not a block page
-    if "teamsData" not in resp.text:
-        raise ValueError("Understat returned unexpected content — may be blocking cloud requests.")
-
-    teams_data = _extract_json_var(resp.text, "teamsData")
-    if not teams_data:
-        raise ValueError("Could not parse Understat data")
-
-    matched = None
-    for tid, tdata in teams_data.items():
-        if understat_name.lower() in tdata["title"].lower():
-            matched = tdata
-            break
-
-    if not matched:
-        available = [v["title"] for v in teams_data.values()]
-        raise ValueError(f"Team '{understat_name}' not found. Available: {available}")
-
-    history = matched.get("history", [])
-    recent = history[-last_n:] if len(history) >= last_n else history
-
-    if not recent:
-        raise ValueError(f"No match history for {team_name}")
-
-    xg_for     = round(sum(float(m["xG"])  for m in recent) / len(recent), 3)
-    xg_against = round(sum(float(m["xGA"]) for m in recent) / len(recent), 3)
-
+    rows = _get_csv_data()
+    
+    # Filter rows for this team (home or away)
+    team_rows = []
+    for row in rows:
+        if row.get("HomeTeam", "").strip() == fd_name:
+            team_rows.append({
+                "xg_for":     float(row.get("HomeXG") or row.get("HXGH") or 0),
+                "xg_against": float(row.get("AwayXG") or row.get("AXGH") or 0),
+            })
+        elif row.get("AwayTeam", "").strip() == fd_name:
+            team_rows.append({
+                "xg_for":     float(row.get("AwayXG") or row.get("AXGH") or 0),
+                "xg_against": float(row.get("HomeXG") or row.get("HXGH") or 0),
+            })
+    
+    if not team_rows:
+        raise ValueError(f"Team '{fd_name}' not found in football-data CSV.")
+    
+    # Use last N matches
+    recent = team_rows[-last_n:] if len(team_rows) >= last_n else team_rows
+    
+    # Filter out zero xG rows (missing data)
+    valid = [r for r in recent if r["xg_for"] > 0 or r["xg_against"] > 0]
+    if not valid:
+        raise ValueError(f"No xG data available for {team_name} — may not be in current season CSV.")
+    
+    xg_for     = round(sum(r["xg_for"]     for r in valid) / len(valid), 3)
+    xg_against = round(sum(r["xg_against"] for r in valid) / len(valid), 3)
+    
     return {
-        "team":        matched["title"],
-        "xg_for":      xg_for,
-        "xg_against":  xg_against,
-        "matches_used": len(recent),
+        "team":         team_name,
+        "xg_for":       xg_for,
+        "xg_against":   xg_against,
+        "matches_used": len(valid),
     }
-
 
 # ── Odds API ─────────────────────────────────────────────
 
@@ -321,4 +345,4 @@ def api_match():
 if __name__ == "__main__":
     print("\n  Pricing Engine server starting...")
     print("  Open http://localhost:5000 in your browser\n")
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    app.run(debug=True, port=5000)
