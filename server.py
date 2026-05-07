@@ -46,30 +46,6 @@ HEADERS = {
     "Referer": "https://www.google.com/",
 }
 
-# Map frontend team names → Understat team names
-UNDERSTAT_TEAM_MAP = {
-    "Arsenal":            "Arsenal",
-    "Aston Villa":        "Aston Villa",
-    "Bournemouth":        "Bournemouth",
-    "Brentford":          "Brentford",
-    "Brighton":           "Brighton",
-    "Burnley":            "Burnley",
-    "Chelsea":            "Chelsea",
-    "Crystal Palace":     "Crystal Palace",
-    "Everton":            "Everton",
-    "Fulham":             "Fulham",
-    "Leeds United":       "Leeds",
-    "Liverpool":          "Liverpool",
-    "Manchester City":    "Manchester City",
-    "Manchester United":  "Manchester United",
-    "Newcastle United":   "Newcastle United",
-    "Nottingham Forest":  "Nottingham Forest",
-    "Sunderland":         "Sunderland",
-    "Tottenham":          "Spurs",
-    "West Ham":           "West Ham",
-    "Wolverhampton":      "Wolverhampton Wanderers",
-}
-
 # Map frontend team names → Odds API team names (partial match friendly)
 ODDS_TEAM_MAP = {
     "Arsenal":            "Arsenal",
@@ -137,11 +113,11 @@ UNDERSTAT_TEAM_MAP = {
 def get_team_xg(team_name: str, season: int = 2025, last_n: int = 10):
     """Fetch rolling average xG for a team from Understat via ScraperAPI."""
     understat_name = UNDERSTAT_TEAM_MAP.get(team_name, team_name)
-    target_url = f"https://understat.com/league/EPL/2025"
+    target_url = f"https://understat.com/league/EPL/{season}"
 
     if SCRAPER_API_KEY:
         # Route through ScraperAPI to avoid IP blocks
-        url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={target_url}"
+        url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={target_url}&render=true"
     else:
         # Fallback: try direct (may be blocked)
         url = target_url
@@ -339,20 +315,7 @@ def api_match():
         result["odds"] = {"error": str(e)}
 
     return jsonify(result)
-    
-@app.route("/api/debug")
-def api_debug():
-    import os
-    target_url = "https://understat.com/league/EPL/2025"
-    scraper_key = os.environ.get("SCRAPER_API_KEY", "")
-    url = f"http://api.scraperapi.com?api_key={scraper_key}&url={target_url}"
-    resp = requests.get(url, headers=HEADERS, timeout=60)
-    return jsonify({
-        "status": resp.status_code,
-        "has_teamsData": "teamsData" in resp.text,
-        "content_length": len(resp.text),
-        "first_500": resp.text[:500]
-    })
+
 
 if __name__ == "__main__":
     print("\n  Pricing Engine server starting...")
