@@ -1,13 +1,15 @@
 """
 Pricing Engine — Flask Backend
-Serves xG data from Understat via ScraperAPI and match odds from The Odds API.
+Serves xG data from Understat and match odds from The Odds API.
 """
 
-import re
 import json
 import time
 import os
+import asyncio
+import aiohttp
 import requests
+from understat import Understat
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -15,19 +17,8 @@ app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app, origins="*")
 
 # ── Config ──────────────────────────────────────────────
-ODDS_API_KEY    = os.environ.get("ODDS_API_KEY", "")
-SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "")
-ODDS_API_BASE   = "https://api.the-odds-api.com/v4"
-
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
-    ),
-    "Accept-Language": "en-GB,en;q=0.9",
-    "Referer": "https://www.google.com/",
-}
+ODDS_API_KEY  = os.environ.get("ODDS_API_KEY", "")
+ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 
 # ── Team name maps ───────────────────────────────────────
 
@@ -78,83 +69,39 @@ ODDS_TEAM_MAP = {
 }
 
 
-# ── xG scraper ───────────────────────────────────────────
+# ── xG scraper using understat package ───────────────────
 
-def _extract_json_var(html, var_name):
-    # Try multiple patterns to handle different Understat encoding formats
-    patterns = [
-        rf"var\s+{var_name}\s*=\s*JSON\.parse\('(.+?)'\)",
-        rf"var\s+{var_name}\s*=\s*JSON\.parse\(\"(.+?)\"\)",
-        rf"{var_name}\s*=\s*JSON\.parse\('(.+?)'\)",
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, html)
-        if match:
-            raw = match.group(1)
-            raw = raw.replace("\\'", "'")
-            try:
-                # Handle both unicode escapes and hex escapes
-                decoded = raw.encode('raw_unicode_escape').decode('unicode_escape')
-                return json.loads(decoded)
-            except Exception:
-                try:
-                    return json.loads(raw)
-                except Exception:
-                    continue
-    return None
+async def _fetch_team_xg_async(team_name, last_n=10):
+    understat_name = UNDERSTAT_TEAM_MAP.get(team_name, team_name)
+    async with aiohttp.ClientSession() as session:
+        understat = Understat(session)
+        match_data = await understat.get_team_results(
+            understat_name, season="2025"
+        )
 
+    if not match_data:
+        raise ValueError(f"No data returned for {team_name} from Understat.")
 
-def _fetch_understat(url):
-    resp = requests.get(url, headers=HEADERS, timeout=60)
-    resp.raise_for_status()
-    return resp.text
+    recent = match_data[-last_n:] if len(match_data) >= last_n else match_data
+
+    xg_for_vals     = [float(m["xG"]["h"] if m["side"] == "h" else m["xG"]["a"]) for m in recent]
+    xg_against_vals = [float(m["xG"]["a"] if m["side"] == "h" else m["xG"]["h"]) for m in recent]
+
+    return {
+        "team":         understat_name,
+        "xg_for":       round(sum(xg_for_vals)     / len(xg_for_vals),     3),
+        "xg_against":   round(sum(xg_against_vals) / len(xg_against_vals), 3),
+        "matches_used": len(recent),
+    }
 
 
 def get_team_xg(team_name, last_n=10):
-    understat_name = UNDERSTAT_TEAM_MAP.get(team_name, team_name)
-    target_url = "https://understat.com/league/EPL/2025"
-
-    if SCRAPER_API_KEY:
-        url = f"http://api.scraperapi.com?api_key={SCRAPER_API_KEY}&url={target_url}&render=true"
-    else:
-        url = target_url
-
-    time.sleep(1)
-    html = _fetch_understat(url)
-
-    # Check for teamsData in any form
-    if "teamsData" not in html and "teams_data" not in html.lower():
-        raise ValueError("Understat page loaded but xG data not found — Understat may have changed their format.")
-
-    teams_data = _extract_json_var(html, "teamsData")
-    if not teams_data:
-        raise ValueError("Could not parse Understat xG data.")
-
-    matched = None
-    for tid, tdata in teams_data.items():
-        if understat_name.lower() in tdata["title"].lower():
-            matched = tdata
-            break
-
-    if not matched:
-        available = [v["title"] for v in teams_data.values()]
-        raise ValueError(f"Team '{understat_name}' not found. Available: {available}")
-
-    history = matched.get("history", [])
-    recent = history[-last_n:] if len(history) >= last_n else history
-
-    if not recent:
-        raise ValueError(f"No match history for {team_name}")
-
-    xg_for     = round(sum(float(m["xG"])  for m in recent) / len(recent), 3)
-    xg_against = round(sum(float(m["xGA"]) for m in recent) / len(recent), 3)
-
-    return {
-        "team":         matched["title"],
-        "xg_for":       xg_for,
-        "xg_against":   xg_against,
-        "matches_used": len(recent),
-    }
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(_fetch_team_xg_async(team_name, last_n))
+    finally:
+        loop.close()
 
 
 # ── Odds API ─────────────────────────────────────────────
@@ -225,31 +172,11 @@ def index():
 
 @app.route("/api/debug")
 def api_debug():
-    target_url  = "https://understat.com/league/EPL/2025"
-    scraper_key = os.environ.get("SCRAPER_API_KEY", "")
-    url = f"http://api.scraperapi.com?api_key={scraper_key}&url={target_url}&render=true"
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=60)
-        html = resp.text
-
-        # Find teamsData location
-        idx = html.find("teamsData")
-        teams_snippet = html[max(0, idx - 20):idx + 200] if idx >= 0 else "teamsData not found in page"
-
-        # Find JSON.parse location
-        jp_idx = html.find("JSON.parse")
-        jp_snippet = html[max(0, jp_idx - 50):jp_idx + 150] if jp_idx >= 0 else "JSON.parse not found"
-
-        return jsonify({
-            "status":           resp.status_code,
-            "content_length":   len(html),
-            "has_teamsData":    "teamsData" in html,
-            "has_JSON_parse":   "JSON.parse" in html,
-            "teams_snippet":    teams_snippet,
-            "jp_snippet":       jp_snippet,
-        })
+        data = get_team_xg("Arsenal", last_n=5)
+        return jsonify({"status": "ok", "sample": data})
     except Exception as e:
-        return jsonify({"error": str(e)})
+        return jsonify({"status": "error", "message": str(e)})
 
 
 @app.route("/api/xg")
