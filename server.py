@@ -137,7 +137,7 @@ UNDERSTAT_TEAM_MAP = {
 def get_team_xg(team_name: str, season: int = 2025, last_n: int = 10):
     """Fetch rolling average xG for a team from Understat via ScraperAPI."""
     understat_name = UNDERSTAT_TEAM_MAP.get(team_name, team_name)
-    target_url = f"https://understat.com/league/EPL/{season}"
+    target_url = f"https://understat.com/league/EPL/2025"
 
     if SCRAPER_API_KEY:
         # Route through ScraperAPI to avoid IP blocks
