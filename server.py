@@ -16,7 +16,7 @@ CORS(app, origins="*")
 ODDS_API_KEY     = os.environ.get("ODDS_API_KEY", "")
 RAPIDAPI_KEY     = os.environ.get("RAPIDAPI_KEY", "")
 ODDS_API_BASE    = "https://api.the-odds-api.com/v4"
-APIFOOTBALL_BASE = "https://api-football-v1.p.rapidapi.com/v3"
+APIFOOTBALL_BASE = "https://v3.football.api-sports.io"
 EPL_LEAGUE_ID    = 39
 SEASON           = 2025
 
@@ -69,8 +69,7 @@ ODDS_TEAM_MAP = {
 
 def _headers():
     return {
-        "x-rapidapi-key":  RAPIDAPI_KEY,
-        "x-rapidapi-host": "api-football-v1.p.rapidapi.com",
+        "x-apisports-key": RAPIDAPI_KEY,
     }
 
 
