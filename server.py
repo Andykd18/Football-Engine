@@ -81,17 +81,33 @@ ODDS_TEAM_MAP = {
 # ── xG scraper ───────────────────────────────────────────
 
 def _extract_json_var(html, var_name):
-    pattern = rf"var\s+{var_name}\s*=\s*JSON\.parse\('(.+?)'\)"
-    match = re.search(pattern, html)
-    if not match:
-        return None
-    raw = match.group(1)
-    raw = raw.replace("\\'", "'")
-    try:
-        raw = raw.encode("utf-8").decode("unicode_escape")
-    except Exception:
-        pass
-    return json.loads(raw)
+    # Try multiple patterns to handle different Understat encoding formats
+    patterns = [
+        rf"var\s+{var_name}\s*=\s*JSON\.parse\('(.+?)'\)",
+        rf"var\s+{var_name}\s*=\s*JSON\.parse\(\"(.+?)\"\)",
+        rf"{var_name}\s*=\s*JSON\.parse\('(.+?)'\)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, html)
+        if match:
+            raw = match.group(1)
+            raw = raw.replace("\\'", "'")
+            try:
+                # Handle both unicode escapes and hex escapes
+                decoded = raw.encode('raw_unicode_escape').decode('unicode_escape')
+                return json.loads(decoded)
+            except Exception:
+                try:
+                    return json.loads(raw)
+                except Exception:
+                    continue
+    return None
+
+
+def _fetch_understat(url):
+    resp = requests.get(url, headers=HEADERS, timeout=60)
+    resp.raise_for_status()
+    return resp.text
 
 
 def get_team_xg(team_name, last_n=10):
@@ -104,15 +120,15 @@ def get_team_xg(team_name, last_n=10):
         url = target_url
 
     time.sleep(1)
-    resp = requests.get(url, headers=HEADERS, timeout=60)
-    resp.raise_for_status()
+    html = _fetch_understat(url)
 
-    if "teamsData" not in resp.text:
-        raise ValueError("Could not load Understat data — try again in a moment.")
+    # Check for teamsData in any form
+    if "teamsData" not in html and "teams_data" not in html.lower():
+        raise ValueError("Understat page loaded but xG data not found — Understat may have changed their format.")
 
-    teams_data = _extract_json_var(resp.text, "teamsData")
+    teams_data = _extract_json_var(html, "teamsData")
     if not teams_data:
-        raise ValueError("Could not parse Understat data.")
+        raise ValueError("Could not parse Understat xG data.")
 
     matched = None
     for tid, tdata in teams_data.items():
@@ -214,15 +230,23 @@ def api_debug():
     url = f"http://api.scraperapi.com?api_key={scraper_key}&url={target_url}&render=true"
     try:
         resp = requests.get(url, headers=HEADERS, timeout=60)
-        idx = resp.text.find("JSON.parse")
-        snippet = resp.text[max(0, idx - 50):idx + 150] if idx >= 0 else "not found"
+        html = resp.text
+
+        # Find teamsData location
+        idx = html.find("teamsData")
+        teams_snippet = html[max(0, idx - 20):idx + 200] if idx >= 0 else "teamsData not found in page"
+
+        # Find JSON.parse location
+        jp_idx = html.find("JSON.parse")
+        jp_snippet = html[max(0, jp_idx - 50):jp_idx + 150] if jp_idx >= 0 else "JSON.parse not found"
+
         return jsonify({
-            "status":             resp.status_code,
-            "has_teamsData":      "teamsData" in resp.text,
-            "has_JSON_parse":     "JSON.parse" in resp.text,
-            "has_var_teamsData":  "var teamsData" in resp.text,
-            "content_length":     len(resp.text),
-            "json_parse_snippet": snippet,
+            "status":           resp.status_code,
+            "content_length":   len(html),
+            "has_teamsData":    "teamsData" in html,
+            "has_JSON_parse":   "JSON.parse" in html,
+            "teams_snippet":    teams_snippet,
+            "jp_snippet":       jp_snippet,
         })
     except Exception as e:
         return jsonify({"error": str(e)})
