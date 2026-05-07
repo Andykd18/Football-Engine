@@ -209,19 +209,44 @@ def api_debug():
     if not RAPIDAPI_KEY:
         return jsonify({"error": "RAPIDAPI_KEY not set."})
     try:
+        # Get a recent fixture
         resp = requests.get(
             f"{APIFOOTBALL_BASE}/fixtures",
             headers=_headers(),
-            params={"team": 42, "league": EPL_LEAGUE_ID, "season": SEASON, "last": 3},
+            params={"team": 42, "league": EPL_LEAGUE_ID, "season": SEASON, "last": 1},
             timeout=15
         )
-        data = resp.json()
-        fixtures = data.get("response", [])
+        fixtures = resp.json().get("response", [])
+        if not fixtures:
+            return jsonify({"error": "No fixtures found"})
+
+        fixture_id = fixtures[0].get("fixture", {}).get("id")
+
+        # Get statistics for that fixture
+        stats_resp = requests.get(
+            f"{APIFOOTBALL_BASE}/fixtures/statistics",
+            headers=_headers(),
+            params={"fixture": fixture_id},
+            timeout=15
+        )
+        all_stats = stats_resp.json().get("response", [])
+
+        # Show all stat types available
+        stat_types = []
+        for team_stats in all_stats:
+            team_name = team_stats.get("team", {}).get("name")
+            for stat in team_stats.get("statistics", []):
+                stat_types.append({
+                    "team": team_name,
+                    "type": stat.get("type"),
+                    "value": stat.get("value"),
+                })
+
         return jsonify({
-            "status":          resp.status_code,
-            "fixtures_found":  len(fixtures),
-            "errors":          data.get("errors", []),
-            "first_fixture":   fixtures[0].get("fixture", {}).get("date") if fixtures else None,
+            "fixture_id":  fixture_id,
+            "fixture_date": fixtures[0].get("fixture", {}).get("date"),
+            "stats_count": len(stat_types),
+            "all_stats":   stat_types,
         })
     except Exception as e:
         return jsonify({"error": str(e)})
