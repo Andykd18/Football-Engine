@@ -163,8 +163,8 @@ def get_team_xg(team_name: str, season: int = 2025, last_n: int = 10):
 
 def get_match_odds(home_team: str, away_team: str):
     """Fetch H2H odds for a specific PL fixture from The Odds API."""
-    if ODDS_API_KEY == "YOUR_API_KEY_HERE":
-        return {"error": "No API key set. Add your key to server.py (ODDS_API_KEY)."}
+if not ODDS_API_KEY:
+    return {"error": "No API key set. Add your key to Railway Variables (ODDS_API_KEY)."}
 
     url = f"{ODDS_API_BASE}/sports/soccer_epl/odds"
     params = {
