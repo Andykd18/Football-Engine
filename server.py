@@ -113,7 +113,7 @@ UNDERSTAT_TEAM_MAP = {
 def get_team_xg(team_name: str, season: int = 2025, last_n: int = 10):
     """Fetch rolling average xG for a team from Understat via ScraperAPI."""
     understat_name = UNDERSTAT_TEAM_MAP.get(team_name, team_name)
-    target_url = f"https://understat.com/league/EPL/{season}"
+    target_url = "https://understat.com/league/EPL/2025"
 
     if SCRAPER_API_KEY:
         # Route through ScraperAPI to avoid IP blocks
@@ -226,7 +226,7 @@ def get_match_odds(home_team: str, away_team: str):
 
 @app.route("/")
 def index():
-    return app.send_static_file("index.html")
+    return "OK", 200
 
 
 @app.route("/api/xg")
@@ -315,6 +315,23 @@ def api_match():
         result["odds"] = {"error": str(e)}
 
     return jsonify(result)
+
+
+@app.route("/api/debug")
+def api_debug():
+    target_url = "https://understat.com/league/EPL/2025"
+    scraper_key = os.environ.get("SCRAPER_API_KEY", "")
+    url = f"http://api.scraperapi.com?api_key={scraper_key}&url={target_url}&render=true"
+    try:
+        resp = requests.get(url, headers=HEADERS, timeout=60)
+        return jsonify({
+            "status": resp.status_code,
+            "has_teamsData": "teamsData" in resp.text,
+            "content_length": len(resp.text),
+            "first_200": resp.text[:200]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 
 if __name__ == "__main__":
