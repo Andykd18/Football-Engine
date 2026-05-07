@@ -14,12 +14,12 @@ Then open index.html in your browser (or visit http://localhost:5000)
 import re
 import json
 import time
+import os
 import requests
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder=".", static_url_path="")
-import os
 ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")
 
 # ── Config ──────────────────────────────────────────────
@@ -208,8 +208,7 @@ def get_match_odds(home_team: str, away_team: str):
 
 @app.route("/")
 def index():
-    return app.send_static_file("index.html")
-
+    return "OK", 200
 
 @app.route("/api/xg")
 def api_xg():
