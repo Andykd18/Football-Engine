@@ -339,7 +339,20 @@ def api_match():
         result["odds"] = {"error": str(e)}
 
     return jsonify(result)
-
+    
+@app.route("/api/debug")
+def api_debug():
+    import os
+    target_url = "https://understat.com/league/EPL/2025"
+    scraper_key = os.environ.get("SCRAPER_API_KEY", "")
+    url = f"http://api.scraperapi.com?api_key={scraper_key}&url={target_url}"
+    resp = requests.get(url, headers=HEADERS, timeout=60)
+    return jsonify({
+        "status": resp.status_code,
+        "has_teamsData": "teamsData" in resp.text,
+        "content_length": len(resp.text),
+        "first_500": resp.text[:500]
+    })
 
 if __name__ == "__main__":
     print("\n  Pricing Engine server starting...")
