@@ -579,7 +579,7 @@
     <button class="fetch-btn" id="fetch-btn" onclick="fetchData()">
       ↓ Fetch xG &amp; odds
     </button>
-    <button class="calc-btn" onclick="run()">Calculate</button>
+    <button class="calc-btn" onclick="calculate()">Calculate</button>
   </div>
   <div class="fetch-status" id="fetch-status"></div>
 
@@ -731,7 +731,7 @@ async function fetchData() {
     const allOk = msgs.every(m => !m.toLowerCase().includes('error') && !m.toLowerCase().includes('not found'));
     status.className = 'fetch-status ' + (allOk ? 'ok' : 'err');
     status.textContent = msgs.join(' · ');
-    run();
+    calculate();
 
   } catch (e) {
     status.className = 'fetch-status err';
@@ -875,17 +875,24 @@ function run() {
     <div class="leg-item"><div class="leg-dot" style="background:#3B6D11"></div>Draw</div>
     <div class="leg-item"><div class="leg-dot" style="background:#A32D2D"></div>${aName} win</div>`;
 
-  // Save to history
+  // Store result so calculate() can save it to history
+  window._lastResult = { hName, aName, hw, dr, aw, himp, dimp, aimp, minEdge };
+}
+
+function calculate() {
+  run();
+  if (!window._lastResult) return;
+  const r = window._lastResult;
   const now = new Date();
   const timeStr = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) +
                   ' · ' + now.toLocaleDateString([], {day:'numeric', month:'short'});
   saveHistory({
-    home: hName, away: aName,
+    home: r.hName, away: r.aName,
     hxg: $('hxg').value, axg: $('axg').value,
     hodds: $('hodds').value, dodds: $('dodds').value, aodds: $('aodds').value,
-    hProb: hw, dProb: dr, aProb: aw,
-    hImp: himp, dImp: dimp, aImp: aimp,
-    minEdge, time: timeStr,
+    hProb: r.hw, dProb: r.dr, aProb: r.aw,
+    hImp: r.himp, dImp: r.dimp, aImp: r.aimp,
+    minEdge: r.minEdge, time: timeStr,
   });
 }
 
