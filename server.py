@@ -22,7 +22,7 @@ app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
 
 # ── Config ──────────────────────────────────────────────
-ODDS_API_KEY = os.environ.get("ODDS_API_KEY", "")   # Get free key at: https://the-odds-api.com
+ODDS_API_KEY = "YOUR_API_KEY_HERE"   # Get free key at: https://the-odds-api.com
 ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 UNDERSTAT_BASE = "https://understat.com"
 
@@ -163,10 +163,8 @@ def get_team_xg(team_name: str, season: int = 2025, last_n: int = 10):
 
 def get_match_odds(home_team: str, away_team: str):
     """Fetch H2H odds for a specific PL fixture from The Odds API."""
-def get_match_odds(home_team: str, away_team: str):
-    """Fetch H2H odds for a specific PL fixture from The Odds API."""
     if not ODDS_API_KEY:
-        return {"error": "No API key set. Add your key to Railway Variables (ODDS_API_KEY)."}
+        return {"error": "No API key set. Add ODDS_API_KEY to Railway Variables."}
 
     url = f"{ODDS_API_BASE}/sports/soccer_epl/odds"
     params = {
