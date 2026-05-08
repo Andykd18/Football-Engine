@@ -678,7 +678,7 @@
       <div class="oc-imp" id="ay-sub">Avg per match</div>
     </div>
   </div>
-  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
     <div class="oc">
       <div class="oc-lbl" id="hr-lbl">Home red cards</div>
       <div class="oc-pct" id="hr-avg">—</div>
@@ -688,6 +688,59 @@
       <div class="oc-lbl" id="ar-lbl">Away red cards</div>
       <div class="oc-pct" id="ar-avg">—</div>
       <div class="oc-imp" id="ar-sub">Avg per match</div>
+    </div>
+  </div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
+    <div class="oc">
+      <div class="oc-bar" id="hs-bar" style="background:var(--blue);width:0%"></div>
+      <div class="oc-lbl" id="hs-lbl">Home total shots</div>
+      <div class="oc-pct" id="hs-avg">—</div>
+      <div class="oc-imp" id="hs-sub">Avg per match</div>
+    </div>
+    <div class="oc">
+      <div class="oc-bar" id="as-bar" style="background:var(--red);width:0%"></div>
+      <div class="oc-lbl" id="as-lbl">Away total shots</div>
+      <div class="oc-pct" id="as-avg">—</div>
+      <div class="oc-imp" id="as-sub">Avg per match</div>
+    </div>
+  </div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
+    <div class="oc">
+      <div class="oc-lbl" id="hf-lbl">Home fouls</div>
+      <div class="oc-pct" id="hf-avg">—</div>
+      <div class="oc-imp" id="hf-sub">Avg per match</div>
+    </div>
+    <div class="oc">
+      <div class="oc-lbl" id="af-lbl">Away fouls</div>
+      <div class="oc-pct" id="af-avg">—</div>
+      <div class="oc-imp" id="af-sub">Avg per match</div>
+    </div>
+  </div>
+
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
+    <div class="oc">
+      <div class="oc-bar" id="hs-bar" style="background:var(--blue);width:0%"></div>
+      <div class="oc-lbl" id="hs-lbl">Home shots</div>
+      <div class="oc-pct" id="hs-avg">—</div>
+      <div class="oc-imp" id="hs-sub">Avg per match</div>
+    </div>
+    <div class="oc">
+      <div class="oc-bar" id="as-bar" style="background:var(--red);width:0%"></div>
+      <div class="oc-lbl" id="as-lbl">Away shots</div>
+      <div class="oc-pct" id="as-avg">—</div>
+      <div class="oc-imp" id="as-sub">Avg per match</div>
+    </div>
+  </div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
+    <div class="oc">
+      <div class="oc-lbl" id="hf-lbl">Home fouls</div>
+      <div class="oc-pct" id="hf-avg">—</div>
+      <div class="oc-imp" id="hf-sub">Avg per match</div>
+    </div>
+    <div class="oc">
+      <div class="oc-lbl" id="af-lbl">Away fouls</div>
+      <div class="oc-pct" id="af-avg">—</div>
+      <div class="oc-imp" id="af-sub">Avg per match</div>
     </div>
   </div>
 
@@ -795,7 +848,7 @@ async function fetchData() {
     if (data.xg && !data.xg.error) {
       $('hxg').value = data.xg.home_lambda;
       $('axg').value = data.xg.away_lambda;
-      msgs.push(`xG loaded (last 15 matches)`);
+      msgs.push(`xG loaded (last 10 matches)`);
       // Populate corners and cards
       const h = data.xg.home, a = data.xg.away;
       const hName = data.xg.home.team, aName = data.xg.away.team;
@@ -833,11 +886,39 @@ async function fetchData() {
       $('ar-lbl').textContent = aName + ' reds';
       if (h.red_cards_for != null) {
         $('hr-avg').textContent = h.red_cards_for.toFixed(2);
-        $('hr-sub').textContent = `Conceded: ${h.red_cards_against ?? '—'} avg`;
+        $('hr-sub').textContent = `Conceded: ${(h.red_cards_against ?? 0).toFixed(2)} avg`;
       }
       if (a.red_cards_for != null) {
         $('ar-avg').textContent = a.red_cards_for.toFixed(2);
-        $('ar-sub').textContent = `Conceded: ${a.red_cards_against ?? '—'} avg`;
+        $('ar-sub').textContent = `Conceded: ${(a.red_cards_against ?? 0).toFixed(2)} avg`;
+      }
+
+      // Shots
+      $('hs-lbl').textContent = hName + ' shots';
+      $('as-lbl').textContent = aName + ' shots';
+      if (h.shots_for != null) {
+        $('hs-avg').textContent = h.shots_for.toFixed(1);
+        $('hs-sub').textContent = `Faced: ${h.shots_against ?? '—'} avg`;
+        const maxS = Math.max(h.shots_for, a.shots_for || 0, 1);
+        $('hs-bar').style.width = (h.shots_for / maxS * 100).toFixed(0) + '%';
+      }
+      if (a.shots_for != null) {
+        $('as-avg').textContent = a.shots_for.toFixed(1);
+        $('as-sub').textContent = `Faced: ${a.shots_against ?? '—'} avg`;
+        const maxS = Math.max(h.shots_for || 0, a.shots_for, 1);
+        $('as-bar').style.width = (a.shots_for / maxS * 100).toFixed(0) + '%';
+      }
+
+      // Fouls
+      $('hf-lbl').textContent = hName + ' fouls';
+      $('af-lbl').textContent = aName + ' fouls';
+      if (h.fouls_for != null) {
+        $('hf-avg').textContent = h.fouls_for.toFixed(1);
+        $('hf-sub').textContent = `Drawn: ${h.fouls_against ?? '—'} avg`;
+      }
+      if (a.fouls_for != null) {
+        $('af-avg').textContent = a.fouls_for.toFixed(1);
+        $('af-sub').textContent = `Drawn: ${a.fouls_against ?? '—'} avg`;
       }
     } else if (data.xg?.error) {
       msgs.push(`xG: ${data.xg.error}`);
