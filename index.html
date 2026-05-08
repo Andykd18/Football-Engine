@@ -1363,15 +1363,27 @@ function exportCSV() {
   }
 
   const headers = [
-    'Date/Time',
-    'Home Team', 'Away Team',
-    'Home xG', 'Away xG',
-    'Home xGA', 'Away xGA',
-    'Home Odds', 'Draw Odds', 'Away Odds',
-    'Model Home %', 'Model Draw %', 'Model Away %',
-    'Implied Home %', 'Implied Draw %', 'Implied Away %',
-    'Home Edge %', 'Draw Edge %', 'Away Edge %',
-    'Home Value?', 'Draw Value?', 'Away Value?',
+    'Home Team',
+    'Away Team',
+    'Home xG',
+    'Away xG',
+    'Home xGA',
+    'Away xGA',
+    'Home Odds',
+    'Draw Odds',
+    'Away Odds',
+    'Model Home %',
+    'Model Draw %',
+    'Model Away %',
+    'Implied Home %',
+    'Implied Draw %',
+    'Implied Away %',
+    'Home Edge %',
+    'Draw Edge %',
+    'Away Edge %',
+    'Home Value',
+    'Draw Value',
+    'Away Value',
     'Actual Result'
   ];
 
@@ -1387,26 +1399,37 @@ function exportCSV() {
       return 'FAIR';
     }
 
-    return [
-      e.time || '',
-      e.home, e.away,
-      e.hxg || '', e.axg || '',
-      e.hxga || '', e.axga || '',
-      e.hodds || '', e.dodds || '', e.aodds || '',
-      (e.hProb * 100).toFixed(1),
-      (e.dProb * 100).toFixed(1),
-      (e.aProb * 100).toFixed(1),
-      (e.hImp * 100).toFixed(1),
-      (e.dImp * 100).toFixed(1),
-      (e.aImp * 100).toFixed(1),
-      hEdge, dEdge, aEdge,
-      valueLabel(hEdge), valueLabel(dEdge), valueLabel(aEdge),
-      '' // Actual Result — to be filled in manually
-    ].map(v => `"${v}"`).join(',');
+    const cells = [
+      e.home,
+      e.away,
+      e.hxg || '',
+      e.axg || '',
+      e.hxga || '',
+      e.axga || '',
+      e.hodds || '',
+      e.dodds || '',
+      e.aodds || '',
+      (e.hProb * 100).toFixed(1) + '%',
+      (e.dProb * 100).toFixed(1) + '%',
+      (e.aProb * 100).toFixed(1) + '%',
+      (e.hImp * 100).toFixed(1) + '%',
+      (e.dImp * 100).toFixed(1) + '%',
+      (e.aImp * 100).toFixed(1) + '%',
+      hEdge + '%',
+      dEdge + '%',
+      aEdge + '%',
+      valueLabel(hEdge),
+      valueLabel(dEdge),
+      valueLabel(aEdge),
+      ''
+    ];
+
+    return cells.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
   });
 
-  const csv = [headers.join(','), ...rows].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
+  const bom = '﻿'; // UTF-8 BOM for Excel compatibility
+  const csv = bom + [headers.map(h => `"${h}"`).join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
