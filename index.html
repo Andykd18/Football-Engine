@@ -518,6 +518,24 @@
 
   .acca-add-btn:hover { color: var(--text); }
 
+  /* ── Export button ── */
+  .export-btn {
+    width: 100%;
+    padding: 9px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    border: 0.5px solid var(--border-mid);
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    color: var(--text-2);
+    margin-top: 10px;
+    transition: background .15s, color .15s;
+  }
+  .export-btn:hover { background: var(--surface); color: var(--text); }
+
+
   /* ── Fixture picker ── */
   .fixture-picker {
     margin-bottom: 1rem;
@@ -790,6 +808,7 @@
       <div class="section-title" style="margin-bottom:0">Search history</div>
       <button class="clear-btn" onclick="clearHistory()">Clear all</button>
     </div>
+    <button class="export-btn" onclick="exportCSV()">⬇ Export to CSV</button>
     <div id="history-list"><div class="history-empty">No searches yet — run a calculation to save it here.</div></div>
   </div>
 
@@ -1192,6 +1211,7 @@ function calculate() {
   saveHistory({
     home: r.hName, away: r.aName,
     hxg: $('hxg').value, axg: $('axg').value,
+    hxga: $('hxga').value, axga: $('axga').value,
     hodds: $('hodds').value, dodds: $('dodds').value, aodds: $('aodds').value,
     hProb: r.hw, dProb: r.dr, aProb: r.aw,
     hImp: r.himp, dImp: r.dimp, aImp: r.aimp,
@@ -1333,11 +1353,76 @@ function renderHistory() {
 // ── End History & Acca ────────────────────────────────────
 
 
+
+// ── CSV Export ───────────────────────────────────────────
+
+function exportCSV() {
+  if (history.length === 0) {
+    alert('No searches to export yet — run some calculations first.');
+    return;
+  }
+
+  const headers = [
+    'Date/Time',
+    'Home Team', 'Away Team',
+    'Home xG', 'Away xG',
+    'Home xGA', 'Away xGA',
+    'Home Odds', 'Draw Odds', 'Away Odds',
+    'Model Home %', 'Model Draw %', 'Model Away %',
+    'Implied Home %', 'Implied Draw %', 'Implied Away %',
+    'Home Edge %', 'Draw Edge %', 'Away Edge %',
+    'Home Value?', 'Draw Value?', 'Away Value?',
+    'Actual Result'
+  ];
+
+  const rows = history.map(e => {
+    const minEdgePct = (e.minEdge || 0.05) * 100;
+    const hEdge = ((e.hProb - e.hImp) * 100).toFixed(1);
+    const dEdge = ((e.dProb - e.dImp) * 100).toFixed(1);
+    const aEdge = ((e.aProb - e.aImp) * 100).toFixed(1);
+
+    function valueLabel(edge) {
+      if (parseFloat(edge) >= minEdgePct) return 'VALUE';
+      if (parseFloat(edge) <= -minEdgePct) return 'OVERPRICED';
+      return 'FAIR';
+    }
+
+    return [
+      e.time || '',
+      e.home, e.away,
+      e.hxg || '', e.axg || '',
+      e.hxga || '', e.axga || '',
+      e.hodds || '', e.dodds || '', e.aodds || '',
+      (e.hProb * 100).toFixed(1),
+      (e.dProb * 100).toFixed(1),
+      (e.aProb * 100).toFixed(1),
+      (e.hImp * 100).toFixed(1),
+      (e.dImp * 100).toFixed(1),
+      (e.aImp * 100).toFixed(1),
+      hEdge, dEdge, aEdge,
+      valueLabel(hEdge), valueLabel(dEdge), valueLabel(aEdge),
+      '' // Actual Result — to be filled in manually
+    ].map(v => `"${v}"`).join(',');
+  });
+
+  const csv = [headers.join(','), ...rows].join('
+');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `pricing-engine-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── End CSV Export ────────────────────────────────────────
+
 // ── Fixture picker ───────────────────────────────────────
 
 // Map API-Football team names to our dropdown values
 const TEAM_NAME_MAP = {
-   "Arsenal": "Arsenal",
+  "Arsenal": "Arsenal",
   "Aston Villa": "Aston Villa",
   "Bournemouth": "Bournemouth",
   "Brentford": "Brentford",
@@ -1348,12 +1433,11 @@ const TEAM_NAME_MAP = {
   "Crystal Palace": "Crystal Palace",
   "Everton": "Everton",
   "Fulham": "Fulham",
-  "Leeds": "Leeds United",
-"Leeds United": "Leeds United",
+  "Leeds United": "Leeds United",
   "Liverpool": "Liverpool",
   "Manchester City": "Manchester City",
   "Manchester United": "Manchester United",
-  "Newcastle": "Newcastle United",
+  "Newcastle United": "Newcastle United",
   "Nottingham Forest": "Nottingham Forest",
   "Sunderland": "Sunderland",
   "Tottenham Hotspur": "Tottenham",
