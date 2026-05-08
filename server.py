@@ -84,7 +84,7 @@ def get_team_xg(team_name, last_n=10):
     resp = requests.get(
         f"{APIFOOTBALL_BASE}/fixtures",
         headers=_headers(),
-        params={"team": team_id, "league": EPL_LEAGUE_ID, "season": SEASON, "last": 15},
+        params={"team": team_id, "league": EPL_LEAGUE_ID, "season": SEASON, "last": 10},
         timeout=15
     )
     resp.raise_for_status()
@@ -101,6 +101,15 @@ def get_team_xg(team_name, last_n=10):
     yellow_against_vals = []
     red_for_vals        = []
     red_against_vals    = []
+    shots_for_vals      = []
+    shots_against_vals  = []
+    fouls_for_vals      = []
+    fouls_against_vals  = []
+    red_against_vals    = []
+    shots_for_vals      = []
+    shots_against_vals  = []
+    fouls_for_vals      = []
+    fouls_against_vals  = []
 
     for fixture in fixtures:
         fixture_id = fixture.get("fixture", {}).get("id")
@@ -115,14 +124,18 @@ def get_team_xg(team_name, last_n=10):
         )
         all_stats = stats_resp.json().get("response", [])
 
-        team_xg = None
-        opp_xg  = None
+        team_xg      = None
+        opp_xg       = None
         team_corners = None
         opp_corners  = None
         team_yellow  = None
         opp_yellow   = None
         team_red     = None
         opp_red      = None
+        team_shots   = None
+        opp_shots    = None
+        team_fouls   = None
+        opp_fouls    = None
 
         for team_stats in all_stats:
             tid = team_stats.get("team", {}).get("id")
@@ -142,8 +155,16 @@ def get_team_xg(team_name, last_n=10):
                     if tid == team_id: team_yellow = fval(val)
                     else:              opp_yellow  = fval(val)
                 elif stype == "Red Cards":
-                    if tid == team_id: team_red = fval(val)
-                    else:              opp_red  = fval(val)
+                    # Treat null/None as 0 for red cards
+                    rval = fval(val) if val and str(val) not in ("None", "") else 0.0
+                    if tid == team_id: team_red = rval
+                    else:              opp_red  = rval
+                elif stype == "Total Shots":
+                    if tid == team_id: team_shots = fval(val)
+                    else:              opp_shots  = fval(val)
+                elif stype == "Fouls":
+                    if tid == team_id: team_fouls = fval(val)
+                    else:              opp_fouls  = fval(val)
 
         if team_xg is not None and opp_xg is not None:
             xg_for_vals.append(team_xg)
@@ -159,6 +180,22 @@ def get_team_xg(team_name, last_n=10):
             red_for_vals.append(team_red)
         if opp_red is not None:
             red_against_vals.append(opp_red)
+        if team_shots is not None:
+            shots_for_vals.append(team_shots)
+        if opp_shots is not None:
+            shots_against_vals.append(opp_shots)
+        if team_fouls is not None:
+            fouls_for_vals.append(team_fouls)
+        if opp_fouls is not None:
+            fouls_against_vals.append(opp_fouls)
+        if team_shots is not None:
+            shots_for_vals.append(team_shots)
+        if opp_shots is not None:
+            shots_against_vals.append(opp_shots)
+        if team_fouls is not None:
+            fouls_for_vals.append(team_fouls)
+        if opp_fouls is not None:
+            fouls_against_vals.append(opp_fouls)
 
         time.sleep(0.5)
 
@@ -166,6 +203,7 @@ def get_team_xg(team_name, last_n=10):
         raise ValueError(f"No xG data found for {team_name} — check your API-Football plan includes statistics.")
 
     def avg(lst): return round(sum(lst) / len(lst), 2) if lst else None
+    def avg_or_zero(lst): return round(sum(lst) / len(lst), 2) if lst else 0.0
 
     return {
         "team":             team_name,
@@ -178,6 +216,14 @@ def get_team_xg(team_name, last_n=10):
         "yellow_cards_against": avg(yellow_against_vals),
         "red_cards_for":        avg(red_for_vals),
         "red_cards_against":    avg(red_against_vals),
+        "shots_for":            avg(shots_for_vals),
+        "shots_against":        avg(shots_against_vals),
+        "fouls_for":            avg(fouls_for_vals),
+        "fouls_against":        avg(fouls_against_vals),
+        "shots_for":            avg(shots_for_vals),
+        "shots_against":        avg(shots_against_vals),
+        "fouls_for":            avg(fouls_for_vals),
+        "fouls_against":        avg(fouls_against_vals),
     }
 
 
