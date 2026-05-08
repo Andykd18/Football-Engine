@@ -202,13 +202,20 @@ def get_team_xg(team_name, last_n=10, venue='all'):
     if not xg_for_vals:
         raise ValueError(f"No xG data found for {team_name} — check your API-Football plan includes statistics.")
 
+    def weighted_avg(lst):
+        """More recent games carry higher weight."""
+        if not lst: return None
+        n = len(lst)
+        weights = list(range(1, n + 1))  # [1, 2, 3, ... n]
+        total_weight = sum(weights)
+        return round(sum(v * w for v, w in zip(lst, weights)) / total_weight, 3)
+
     def avg(lst): return round(sum(lst) / len(lst), 2) if lst else None
-    def avg_or_zero(lst): return round(sum(lst) / len(lst), 2) if lst else 0.0
 
     return {
         "team":             team_name,
-        "xg_for":           round(sum(xg_for_vals)     / len(xg_for_vals),     3),
-        "xg_against":       round(sum(xg_against_vals) / len(xg_against_vals), 3),
+        "xg_for":           weighted_avg(xg_for_vals),
+        "xg_against":       weighted_avg(xg_against_vals),
         "matches_used":     len(xg_for_vals),
         "corners_for":          avg(corner_for_vals),
         "corners_against":      avg(corner_against_vals),
