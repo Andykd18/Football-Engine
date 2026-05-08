@@ -73,7 +73,7 @@ def _headers():
     }
 
 
-def get_team_xg(team_name, last_n=10):
+def get_team_xg(team_name, last_n=10, venue='all'):
     if not RAPIDAPI_KEY:
         raise ValueError("No RAPIDAPI_KEY set in Railway Variables.")
 
@@ -433,8 +433,8 @@ def api_xg():
         return jsonify({"error": "Provide home and away team names"}), 400
 
     try:
-        home_data = get_team_xg(home, last_n=last_n)
-        away_data = get_team_xg(away, last_n=last_n)
+        home_data = get_team_xg(home, last_n=last_n, venue='home')
+        away_data = get_team_xg(away, last_n=last_n, venue='away')
 
         home_lambda = round((home_data["xg_for"] + away_data["xg_against"]) / 2, 3)
         away_lambda = round((away_data["xg_for"]  + home_data["xg_against"]) / 2, 3)
@@ -475,8 +475,8 @@ def api_match():
     result = {}
 
     try:
-        home_data   = get_team_xg(home, last_n=last_n)
-        away_data   = get_team_xg(away, last_n=last_n)
+        home_data   = get_team_xg(home, last_n=last_n, venue='home')
+        away_data   = get_team_xg(away, last_n=last_n, venue='away')
         home_lambda = round((home_data["xg_for"] + away_data["xg_against"]) / 2, 3)
         away_lambda = round((away_data["xg_for"]  + home_data["xg_against"]) / 2, 3)
         result["xg"] = {
