@@ -285,6 +285,42 @@ def get_match_odds(home_team, away_team):
 
 
 # ── Routes ───────────────────────────────────────────────
+@app.route("/api/fixtures")
+def api_fixtures():
+    """Return upcoming EPL fixtures for the next 14 days."""
+    if not RAPIDAPI_KEY:
+        return jsonify({"error": "RAPIDAPI_KEY not set."})
+    try:
+        resp = requests.get(
+            f"{APIFOOTBALL_BASE}/fixtures",
+            headers=_headers(),
+            params={
+                "league": EPL_LEAGUE_ID,
+                "season": SEASON,
+                "next":   10,
+            },
+            timeout=15
+        )
+        resp.raise_for_status()
+        fixtures = resp.json().get("response", [])
+
+        result = []
+        for f in fixtures:
+            home = f.get("teams", {}).get("home", {})
+            away = f.get("teams", {}).get("away", {})
+            date = f.get("fixture", {}).get("date", "")
+            result.append({
+                "fixture_id": f.get("fixture", {}).get("id"),
+                "home":       home.get("name"),
+                "away":       away.get("name"),
+                "date":       date,
+            })
+
+        return jsonify({"fixtures": result})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
 
 @app.route("/")
 def index():
