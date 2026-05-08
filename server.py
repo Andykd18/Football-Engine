@@ -350,10 +350,29 @@ def api_find_team():
         )
         fixtures = fix_resp.json().get("response", [])
 
+    # Check if xG available in first fixture
+    xg_check = None
+    if fixtures:
+        first_id = fixtures[0].get("fixture", {}).get("id")
+        stats_resp = requests.get(
+            f"{APIFOOTBALL_BASE}/fixtures/statistics",
+            headers=_headers(),
+            params={"fixture": first_id},
+            timeout=15
+        )
+        all_stats = stats_resp.json().get("response", [])
+        stat_types = []
+        for ts in all_stats:
+            for s in ts.get("statistics", []):
+                if s.get("type") in ("expected_goals", "Expected Goals"):
+                    stat_types.append({"team": ts.get("team",{}).get("name"), "xg": s.get("value")})
+        xg_check = stat_types
+
     return jsonify({
         "team_id": team_id,
         "fixtures_found": len(fixtures),
-        "first_fixture": fixtures[0].get("fixture", {}).get("date") if fixtures else None
+        "first_fixture": fixtures[0].get("fixture", {}).get("date") if fixtures else None,
+        "xg_in_first_fixture": xg_check
     })
 
 @app.route("/api/debug")
