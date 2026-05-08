@@ -331,13 +331,30 @@ def index():
 @app.route("/api/find-team")
 def api_find_team():
     name = request.args.get("name", "Sunderland")
-    resp = requests.get(
+    team_resp = requests.get(
         f"{APIFOOTBALL_BASE}/teams",
         headers=_headers(),
         params={"name": name, "league": EPL_LEAGUE_ID, "season": SEASON},
         timeout=15
     )
-    return jsonify(resp.json())
+    teams = team_resp.json().get("response", [])
+    team_id = teams[0]["team"]["id"] if teams else None
+
+    fixtures = []
+    if team_id:
+        fix_resp = requests.get(
+            f"{APIFOOTBALL_BASE}/fixtures",
+            headers=_headers(),
+            params={"team": team_id, "league": EPL_LEAGUE_ID, "season": SEASON, "last": 10},
+            timeout=15
+        )
+        fixtures = fix_resp.json().get("response", [])
+
+    return jsonify({
+        "team_id": team_id,
+        "fixtures_found": len(fixtures),
+        "first_fixture": fixtures[0].get("fixture", {}).get("date") if fixtures else None
+    })
 
 @app.route("/api/debug")
 def api_debug():
