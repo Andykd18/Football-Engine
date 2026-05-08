@@ -37,7 +37,7 @@ APIFOOTBALL_TEAM_IDS = {
     "Manchester United":  33,
     "Newcastle United":   34,
     "Nottingham Forest":  65,
-    "Sunderland":         60,
+    "Sunderland":         724,
     "Tottenham":          47,
     "West Ham":           48,
     "Wolverhampton":      39,
