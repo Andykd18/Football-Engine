@@ -651,6 +651,25 @@
     </div>
   </div>
 
+  <div class="section-title" style="margin-top:1.5rem">Corners &amp; cards</div>
+  <div class="outcomes" id="corners-cards" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
+    <div class="oc">
+      <div class="oc-lbl">Total corners</div>
+      <div class="oc-pct" id="corners-total">—</div>
+      <div class="oc-imp" id="corners-sub">Avg per match</div>
+    </div>
+    <div class="oc">
+      <div class="oc-lbl">Yellow cards</div>
+      <div class="oc-pct" id="yellows-total">—</div>
+      <div class="oc-imp" id="yellows-sub">Avg per match</div>
+    </div>
+    <div class="oc">
+      <div class="oc-lbl">Red cards</div>
+      <div class="oc-pct" id="reds-total">—</div>
+      <div class="oc-imp" id="reds-sub">Avg per match</div>
+    </div>
+  </div>
+
   <div class="section-title">Most likely scorelines</div>
   <div class="scorelines" id="bars"></div>
 
@@ -755,7 +774,24 @@ async function fetchData() {
     if (data.xg && !data.xg.error) {
       $('hxg').value = data.xg.home_lambda;
       $('axg').value = data.xg.away_lambda;
-      msgs.push(`xG loaded (last ${data.xg.home.matches_used} matches)`);
+      msgs.push(`xG loaded (last 15 matches)`);
+      // Populate corners and cards if available
+      const h = data.xg.home, a = data.xg.away;
+      if (h.corners_for !== null && a.corners_for !== null) {
+        const totalCorners = ((h.corners_for || 0) + (a.corners_for || 0)).toFixed(1);
+        $('corners-total').textContent = totalCorners;
+        $('corners-sub').textContent = `${h.corners_for} home · ${a.corners_for} away`;
+      }
+      if (h.yellow_cards_avg !== null && a.yellow_cards_avg !== null) {
+        const totalYellows = ((h.yellow_cards_avg || 0) + (a.yellow_cards_avg || 0)).toFixed(1);
+        $('yellows-total').textContent = totalYellows;
+        $('yellows-sub').textContent = `${h.yellow_cards_avg} + ${a.yellow_cards_avg} avg`;
+      }
+      if (h.red_cards_avg !== null && a.red_cards_avg !== null) {
+        const totalReds = ((h.red_cards_avg || 0) + (a.red_cards_avg || 0)).toFixed(2);
+        $('reds-total').textContent = totalReds;
+        $('reds-sub').textContent = `${h.red_cards_avg} + ${a.red_cards_avg} avg`;
+      }
     } else if (data.xg?.error) {
       msgs.push(`xG: ${data.xg.error}`);
     }
