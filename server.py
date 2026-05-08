@@ -37,7 +37,7 @@ APIFOOTBALL_TEAM_IDS = {
     "Manchester United":  33,
     "Newcastle United":   34,
     "Nottingham Forest":  65,
-    "Sunderland":         724,
+    "Sunderland":         60,
     "Tottenham":          47,
     "West Ham":           48,
     "Wolverhampton":      39,
@@ -326,6 +326,18 @@ def api_fixtures():
 def index():
     return "OK", 200
 
+
+
+@app.route("/api/find-team")
+def api_find_team():
+    name = request.args.get("name", "Sunderland")
+    resp = requests.get(
+        f"{APIFOOTBALL_BASE}/teams",
+        headers=_headers(),
+        params={"name": name, "league": EPL_LEAGUE_ID, "season": SEASON},
+        timeout=15
+    )
+    return jsonify(resp.json())
 
 @app.route("/api/debug")
 def api_debug():
