@@ -652,21 +652,42 @@
   </div>
 
   <div class="section-title" style="margin-top:1.5rem">Corners &amp; cards</div>
-  <div class="outcomes" id="corners-cards" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
     <div class="oc">
-      <div class="oc-lbl">Total corners</div>
-      <div class="oc-pct" id="corners-total">—</div>
-      <div class="oc-imp" id="corners-sub">Avg per match</div>
+      <div class="oc-bar" id="hc-bar" style="background:var(--blue);width:0%"></div>
+      <div class="oc-lbl" id="hc-lbl">Home corners</div>
+      <div class="oc-pct" id="hc-avg">—</div>
+      <div class="oc-imp" id="hc-sub">Avg per match</div>
     </div>
     <div class="oc">
-      <div class="oc-lbl">Yellow cards</div>
-      <div class="oc-pct" id="yellows-total">—</div>
-      <div class="oc-imp" id="yellows-sub">Avg per match</div>
+      <div class="oc-bar" id="ac-bar" style="background:var(--red);width:0%"></div>
+      <div class="oc-lbl" id="ac-lbl">Away corners</div>
+      <div class="oc-pct" id="ac-avg">—</div>
+      <div class="oc-imp" id="ac-sub">Avg per match</div>
+    </div>
+  </div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
+    <div class="oc">
+      <div class="oc-lbl" id="hy-lbl">Home yellow cards</div>
+      <div class="oc-pct" id="hy-avg">—</div>
+      <div class="oc-imp" id="hy-sub">Avg per match</div>
     </div>
     <div class="oc">
-      <div class="oc-lbl">Red cards</div>
-      <div class="oc-pct" id="reds-total">—</div>
-      <div class="oc-imp" id="reds-sub">Avg per match</div>
+      <div class="oc-lbl" id="ay-lbl">Away yellow cards</div>
+      <div class="oc-pct" id="ay-avg">—</div>
+      <div class="oc-imp" id="ay-sub">Avg per match</div>
+    </div>
+  </div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
+    <div class="oc">
+      <div class="oc-lbl" id="hr-lbl">Home red cards</div>
+      <div class="oc-pct" id="hr-avg">—</div>
+      <div class="oc-imp" id="hr-sub">Avg per match</div>
+    </div>
+    <div class="oc">
+      <div class="oc-lbl" id="ar-lbl">Away red cards</div>
+      <div class="oc-pct" id="ar-avg">—</div>
+      <div class="oc-imp" id="ar-sub">Avg per match</div>
     </div>
   </div>
 
@@ -775,22 +796,48 @@ async function fetchData() {
       $('hxg').value = data.xg.home_lambda;
       $('axg').value = data.xg.away_lambda;
       msgs.push(`xG loaded (last 15 matches)`);
-      // Populate corners and cards if available
+      // Populate corners and cards
       const h = data.xg.home, a = data.xg.away;
-      if (h.corners_for !== null && a.corners_for !== null) {
-        const totalCorners = ((h.corners_for || 0) + (a.corners_for || 0)).toFixed(1);
-        $('corners-total').textContent = totalCorners;
-        $('corners-sub').textContent = `${h.corners_for} home · ${a.corners_for} away`;
+      const hName = data.xg.home.team, aName = data.xg.away.team;
+
+      // Corners
+      $('hc-lbl').textContent = hName + ' corners';
+      $('ac-lbl').textContent = aName + ' corners';
+      if (h.corners_for != null) {
+        $('hc-avg').textContent = h.corners_for.toFixed(1);
+        $('hc-sub').textContent = `For: ${h.corners_for} · Against: ${h.corners_against}`;
+        const maxC = Math.max(h.corners_for, a.corners_for, 1);
+        $('hc-bar').style.width = (h.corners_for / maxC * 100).toFixed(0) + '%';
       }
-      if (h.yellow_cards_avg !== null && a.yellow_cards_avg !== null) {
-        const totalYellows = ((h.yellow_cards_avg || 0) + (a.yellow_cards_avg || 0)).toFixed(1);
-        $('yellows-total').textContent = totalYellows;
-        $('yellows-sub').textContent = `${h.yellow_cards_avg} + ${a.yellow_cards_avg} avg`;
+      if (a.corners_for != null) {
+        $('ac-avg').textContent = a.corners_for.toFixed(1);
+        $('ac-sub').textContent = `For: ${a.corners_for} · Against: ${a.corners_against}`;
+        const maxC = Math.max(h.corners_for || 0, a.corners_for, 1);
+        $('ac-bar').style.width = (a.corners_for / maxC * 100).toFixed(0) + '%';
       }
-      if (h.red_cards_avg !== null && a.red_cards_avg !== null) {
-        const totalReds = ((h.red_cards_avg || 0) + (a.red_cards_avg || 0)).toFixed(2);
-        $('reds-total').textContent = totalReds;
-        $('reds-sub').textContent = `${h.red_cards_avg} + ${a.red_cards_avg} avg`;
+
+      // Yellow cards
+      $('hy-lbl').textContent = hName + ' yellows';
+      $('ay-lbl').textContent = aName + ' yellows';
+      if (h.yellow_cards_avg != null) {
+        $('hy-avg').textContent = h.yellow_cards_avg.toFixed(1);
+        $('hy-sub').textContent = 'Avg per match (last 15)';
+      }
+      if (a.yellow_cards_avg != null) {
+        $('ay-avg').textContent = a.yellow_cards_avg.toFixed(1);
+        $('ay-sub').textContent = 'Avg per match (last 15)';
+      }
+
+      // Red cards
+      $('hr-lbl').textContent = hName + ' reds';
+      $('ar-lbl').textContent = aName + ' reds';
+      if (h.red_cards_avg != null) {
+        $('hr-avg').textContent = h.red_cards_avg.toFixed(2);
+        $('hr-sub').textContent = 'Avg per match (last 15)';
+      }
+      if (a.red_cards_avg != null) {
+        $('ar-avg').textContent = a.red_cards_avg.toFixed(2);
+        $('ar-sub').textContent = 'Avg per match (last 15)';
       }
     } else if (data.xg?.error) {
       msgs.push(`xG: ${data.xg.error}`);
