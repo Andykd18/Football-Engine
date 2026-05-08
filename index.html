@@ -819,25 +819,25 @@ async function fetchData() {
       // Yellow cards
       $('hy-lbl').textContent = hName + ' yellows';
       $('ay-lbl').textContent = aName + ' yellows';
-      if (h.yellow_cards_avg != null) {
-        $('hy-avg').textContent = h.yellow_cards_avg.toFixed(1);
-        $('hy-sub').textContent = 'Avg per match (last 15)';
+      if (h.yellow_cards_for != null) {
+        $('hy-avg').textContent = h.yellow_cards_for.toFixed(1);
+        $('hy-sub').textContent = `Conceded: ${h.yellow_cards_against ?? '—'} avg`;
       }
-      if (a.yellow_cards_avg != null) {
-        $('ay-avg').textContent = a.yellow_cards_avg.toFixed(1);
-        $('ay-sub').textContent = 'Avg per match (last 15)';
+      if (a.yellow_cards_for != null) {
+        $('ay-avg').textContent = a.yellow_cards_for.toFixed(1);
+        $('ay-sub').textContent = `Conceded: ${a.yellow_cards_against ?? '—'} avg`;
       }
 
       // Red cards
       $('hr-lbl').textContent = hName + ' reds';
       $('ar-lbl').textContent = aName + ' reds';
-      if (h.red_cards_avg != null) {
-        $('hr-avg').textContent = h.red_cards_avg.toFixed(2);
-        $('hr-sub').textContent = 'Avg per match (last 15)';
+      if (h.red_cards_for != null) {
+        $('hr-avg').textContent = h.red_cards_for.toFixed(2);
+        $('hr-sub').textContent = `Conceded: ${h.red_cards_against ?? '—'} avg`;
       }
-      if (a.red_cards_avg != null) {
-        $('ar-avg').textContent = a.red_cards_avg.toFixed(2);
-        $('ar-sub').textContent = 'Avg per match (last 15)';
+      if (a.red_cards_for != null) {
+        $('ar-avg').textContent = a.red_cards_for.toFixed(2);
+        $('ar-sub').textContent = `Conceded: ${a.red_cards_against ?? '—'} avg`;
       }
     } else if (data.xg?.error) {
       msgs.push(`xG: ${data.xg.error}`);
