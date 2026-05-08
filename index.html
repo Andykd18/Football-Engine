@@ -517,6 +517,54 @@
   }
 
   .acca-add-btn:hover { color: var(--text); }
+
+  /* ── Fixture picker ── */
+  .fixture-picker {
+    margin-bottom: 1rem;
+  }
+
+  .fixture-picker-label {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-weight: 500;
+  }
+
+  .fixture-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .fixture-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    transition: border-color .15s, background .15s;
+    text-align: left;
+  }
+
+  .fixture-btn:hover { border-color: var(--border-mid); background: var(--surface2); }
+  .fixture-btn.active { border-color: var(--blue-text); background: var(--blue-light); }
+
+  .fixture-match { font-size: 13px; font-weight: 500; }
+  .fixture-date  { font-size: 11px; color: var(--text-3); }
+
+  .fixture-loading {
+    font-size: 12px;
+    color: var(--text-3);
+    padding: 8px 0;
+  }
+
 </style>
 </head>
 <body>
@@ -526,6 +574,14 @@
     <h1>Pricing Engine</h1>
     <span id="match-title">Leeds United vs Tottenham</span>
   </header>
+
+  <!-- Fixture picker -->
+  <div class="fixture-picker">
+    <div class="fixture-picker-label">Upcoming fixtures</div>
+    <div class="fixture-list" id="fixture-list">
+      <div class="fixture-loading">Loading fixtures...</div>
+    </div>
+  </div>
 
   <div class="pitch">
     <div class="team-card home">
@@ -1276,6 +1332,89 @@ function renderHistory() {
 
 // ── End History & Acca ────────────────────────────────────
 
+
+// ── Fixture picker ───────────────────────────────────────
+
+// Map API-Football team names to our dropdown values
+const TEAM_NAME_MAP = {
+  "Arsenal": "Arsenal",
+  "Aston Villa": "Aston Villa",
+  "Bournemouth": "Bournemouth",
+  "Brentford": "Brentford",
+  "Brighton & Hove Albion": "Brighton",
+  "Brighton": "Brighton",
+  "Burnley": "Burnley",
+  "Chelsea": "Chelsea",
+  "Crystal Palace": "Crystal Palace",
+  "Everton": "Everton",
+  "Fulham": "Fulham",
+  "Leeds United": "Leeds United",
+  "Liverpool": "Liverpool",
+  "Manchester City": "Manchester City",
+  "Manchester United": "Manchester United",
+  "Newcastle United": "Newcastle United",
+  "Nottingham Forest": "Nottingham Forest",
+  "Sunderland": "Sunderland",
+  "Tottenham Hotspur": "Tottenham",
+  "Tottenham": "Tottenham",
+  "West Ham United": "West Ham",
+  "West Ham": "West Ham",
+  "Wolverhampton Wanderers": "Wolverhampton",
+  "Wolverhampton": "Wolverhampton",
+};
+
+let fixturesData = [];
+
+async function loadFixtures() {
+  const list = $('fixture-list');
+  try {
+    const res = await fetch(`${SERVER}/api/fixtures`);
+    const data = await res.json();
+
+    if (data.error || !data.fixtures || data.fixtures.length === 0) {
+      list.innerHTML = '<div class="fixture-loading">No upcoming fixtures found.</div>';
+      return;
+    }
+
+    fixturesData = data.fixtures;
+    renderFixtures();
+  } catch (e) {
+    list.innerHTML = '<div class="fixture-loading">Could not load fixtures.</div>';
+  }
+}
+
+function renderFixtures() {
+  const list = $('fixture-list');
+  const currentHome = $('hteam').value;
+  const currentAway = $('ateam').value;
+
+  list.innerHTML = fixturesData.map((f, i) => {
+    const home = TEAM_NAME_MAP[f.home] || f.home;
+    const away = TEAM_NAME_MAP[f.away] || f.away;
+    const date = new Date(f.date);
+    const dateStr = date.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+    const isActive = home === currentHome && away === currentAway;
+    return `<button class="fixture-btn ${isActive ? 'active' : ''}" onclick="selectFixture(${i})">
+      <span class="fixture-match">${home} vs ${away}</span>
+      <span class="fixture-date">${dateStr}</span>
+    </button>`;
+  }).join('');
+}
+
+function selectFixture(i) {
+  const f = fixturesData[i];
+  const home = TEAM_NAME_MAP[f.home] || f.home;
+  const away = TEAM_NAME_MAP[f.away] || f.away;
+
+  $('hteam').value = home;
+  $('ateam').value = away;
+  updateTitle();
+  run();
+  renderFixtures(); // update active state
+}
+
+// ── End fixture picker ────────────────────────────────────
+
 buildDropdowns();
 updateTitle();
 updateHint('hodds', 'hodds-hint');
@@ -1284,6 +1423,7 @@ updateHint('aodds', 'aodds-hint');
 renderHistory();
 renderAcca();
 run();
+loadFixtures();
 </script>
 </body>
 </html>
