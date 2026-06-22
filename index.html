@@ -590,7 +590,7 @@
 
   <header>
     <h1>Pricing Engine</h1>
-    <span id="match-title">Leeds United vs Tottenham</span>
+    <span id="match-title">Premier League 2026/27</span>
   </header>
 
   <!-- Fixture picker -->
@@ -846,7 +846,7 @@ const $ = id => document.getElementById(id);
 function buildDropdowns() {
   ['hteam','ateam'].forEach((id, i) => {
     const sel = $(id);
-    const def = i === 0 ? 'Leeds United' : 'Tottenham';
+    const def = i === 0 ? 'Arsenal' : 'Coventry City';
     TEAMS.forEach(t => {
       const opt = document.createElement('option');
       opt.value = t; opt.textContent = t;
@@ -1525,7 +1525,7 @@ function selectFixture(i) {
 // ── End fixture picker ────────────────────────────────────
 
 buildDropdowns();
-updateTitle();
+// Keep header as Premier League 2026/27 on load
 updateHint('hodds', 'hodds-hint');
 updateHint('dodds', 'dodds-hint');
 updateHint('aodds', 'aodds-hint');
