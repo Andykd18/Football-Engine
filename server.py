@@ -18,7 +18,7 @@ RAPIDAPI_KEY     = os.environ.get("RAPIDAPI_KEY", "")
 ODDS_API_BASE    = "https://api.the-odds-api.com/v4"
 APIFOOTBALL_BASE = "https://v3.football.api-sports.io"
 EPL_LEAGUE_ID    = 39
-SEASON           = 2025
+SEASON           = 2026
 
 APIFOOTBALL_TEAM_IDS = {
     "Arsenal":            42,
@@ -26,11 +26,13 @@ APIFOOTBALL_TEAM_IDS = {
     "Bournemouth":        35,
     "Brentford":          55,
     "Brighton":           51,
-    "Burnley":            44,
     "Chelsea":            49,
+    "Coventry City":      369,
     "Crystal Palace":     52,
     "Everton":            45,
     "Fulham":             36,
+    "Hull City":          60,
+    "Ipswich Town":       57,
     "Leeds United":       63,
     "Liverpool":          40,
     "Manchester City":    50,
@@ -39,8 +41,6 @@ APIFOOTBALL_TEAM_IDS = {
     "Nottingham Forest":  65,
     "Sunderland":         746,
     "Tottenham":          47,
-    "West Ham":           48,
-    "Wolverhampton":      39,
 }
 
 ODDS_TEAM_MAP = {
@@ -49,11 +49,13 @@ ODDS_TEAM_MAP = {
     "Bournemouth":        "Bournemouth",
     "Brentford":          "Brentford",
     "Brighton":           "Brighton and Hove Albion",
-    "Burnley":            "Burnley",
     "Chelsea":            "Chelsea",
+    "Coventry City":      "Coventry City",
     "Crystal Palace":     "Crystal Palace",
     "Everton":            "Everton",
     "Fulham":             "Fulham",
+    "Hull City":          "Hull City",
+    "Ipswich Town":       "Ipswich Town",
     "Leeds United":       "Leeds United",
     "Liverpool":          "Liverpool",
     "Manchester City":    "Manchester City",
@@ -62,8 +64,6 @@ ODDS_TEAM_MAP = {
     "Nottingham Forest":  "Nottingham Forest",
     "Sunderland":         "Sunderland",
     "Tottenham":          "Tottenham Hotspur",
-    "West Ham":           "West Ham United",
-    "Wolverhampton":      "Wolverhampton Wanderers",
 }
 
 
