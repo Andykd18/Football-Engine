@@ -84,7 +84,7 @@ def get_team_xg(team_name, last_n=10, venue='all'):
     resp = requests.get(
         f"{APIFOOTBALL_BASE}/fixtures",
         headers=_headers(),
-        params={"team": team_id, "league": EPL_LEAGUE_ID, "season": SEASON, "last": 10},
+        params={"team": team_id, "last": 10},
         timeout=15
     )
     resp.raise_for_status()
@@ -352,7 +352,7 @@ def api_find_team():
         fix_resp = requests.get(
             f"{APIFOOTBALL_BASE}/fixtures",
             headers=_headers(),
-            params={"team": team_id, "league": EPL_LEAGUE_ID, "season": SEASON, "last": 10},
+            params={"team": team_id, "last": 10},
             timeout=15
         )
         fixtures = fix_resp.json().get("response", [])
