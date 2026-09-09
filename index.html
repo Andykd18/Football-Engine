@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#1c1c1a">
 <link rel="apple-touch-icon" href="icon-192x192.png">
 <title>Pricing Engine</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -611,8 +612,8 @@
   </div>
 
   <div class="pitch-header" onclick="toggleSection('pitch-body', this)">
-    <span class="pitch-header-title">Match setup</span>
-    <span class="collapsible-arrow open">&#x25BC;</span>
+    <span class="pitch-header-title"><i class="ti ti-layout-2 collapsible-icon" aria-hidden="true"></i>Match setup</span>
+    <i class="ti ti-chevron-down collapsible-arrow" aria-hidden="true"></i>
   </div>
   <div id="pitch-body" class="collapsible-body open" style="max-height:1000px">
   <div class="pitch">
@@ -687,8 +688,8 @@
   </div>
 
   <div class="collapsible-header" onclick="toggleSection('op-body', this)">
-    <span class="collapsible-title">Outcome probabilities</span>
-    <span class="collapsible-arrow open">&#x25BC;</span>
+    <span class="collapsible-title"><i class="ti ti-chart-bar collapsible-icon" aria-hidden="true"></i>Outcome probabilities</span>
+    <i class="ti ti-chevron-down collapsible-arrow" aria-hidden="true"></i>
   </div>
   <div id="op-body" class="collapsible-body open" style="max-height:500px">
   <div class="outcomes">
@@ -718,8 +719,8 @@
   </div><!-- end op-body -->
 
   <div class="collapsible-header" onclick="toggleSection('def-body', this)">
-    <span class="collapsible-title">Defensive &amp; market stats</span>
-    <span class="collapsible-arrow open">&#x25BC;</span>
+    <span class="collapsible-title"><i class="ti ti-shield collapsible-icon" aria-hidden="true"></i>Defensive &amp; market stats</span>
+    <i class="ti ti-chevron-down collapsible-arrow" aria-hidden="true"></i>
   </div>
   <div id="def-body" class="collapsible-body open" style="max-height:800px">
   <div class="outcomes" id="def-stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">
@@ -757,8 +758,8 @@
   </div><!-- end def-body -->
 
   <div class="collapsible-header" onclick="toggleSection('cc-body', this)">
-    <span class="collapsible-title">Corners &amp; cards</span>
-    <span class="collapsible-arrow open">&#x25BC;</span>
+    <span class="collapsible-title"><i class="ti ti-rectangle-vertical collapsible-icon" aria-hidden="true"></i>Corners &amp; cards</span>
+    <i class="ti ti-chevron-down collapsible-arrow" aria-hidden="true"></i>
   </div>
   <div id="cc-body" class="collapsible-body open" style="max-height:1200px">
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
@@ -830,8 +831,8 @@
   </div><!-- end cc-body -->
 
   <div class="collapsible-header" onclick="toggleSection('scores-body', this)">
-    <span class="collapsible-title">Most likely scorelines &amp; matrix</span>
-    <span class="collapsible-arrow open">&#x25BC;</span>
+    <span class="collapsible-title"><i class="ti ti-grid-dots collapsible-icon" aria-hidden="true"></i>Scorelines &amp; matrix</span>
+    <i class="ti ti-chevron-down collapsible-arrow" aria-hidden="true"></i>
   </div>
   <div id="scores-body" class="collapsible-body open" style="max-height:2000px">
   <div style="height:10px"></div>
@@ -848,8 +849,8 @@
   </div><!-- end scores-body -->
 
   <div class="collapsible-header" onclick="toggleSection('hist-body', this)">
-    <span class="collapsible-title">Search history</span>
-    <span class="collapsible-arrow open">&#x25BC;</span>
+    <span class="collapsible-title"><i class="ti ti-history collapsible-icon" aria-hidden="true"></i>Search history</span>
+    <i class="ti ti-chevron-down collapsible-arrow" aria-hidden="true"></i>
   </div>
   <div id="hist-body" class="collapsible-body open" style="max-height:3000px">
   <div class="history-wrap" id="history-wrap" style="border-top:none;padding-top:0.5rem">
@@ -865,8 +866,8 @@
   </div><!-- end hist-body -->
 
   <div class="collapsible-header" onclick="toggleSection('acca-body', this)">
-    <span class="collapsible-title">Acca builder</span>
-    <span class="collapsible-arrow open">&#x25BC;</span>
+    <span class="collapsible-title"><i class="ti ti-stack collapsible-icon" aria-hidden="true"></i>Acca builder</span>
+    <i class="ti ti-chevron-down collapsible-arrow" aria-hidden="true"></i>
   </div>
   <div id="acca-body" class="collapsible-body open" style="max-height:2000px">
   <div class="acca-wrap" id="acca-wrap" style="margin-top:0">
@@ -1598,9 +1599,7 @@ function toggleSection(id, header) {
   if (!body) return;
   const isOpen = body.style.display !== 'none';
   body.style.display = isOpen ? 'none' : '';
-  if (arrow) {
-    arrow.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
-  }
+  if (arrow) arrow.classList.toggle('rotated', isOpen);
 }
 
 if ('serviceWorker' in navigator) {
