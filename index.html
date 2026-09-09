@@ -591,7 +591,7 @@
   <div class="pitch">
     <div class="team-card home">
       <div class="team-pill">Home</div>
-      <select id="hteam" onchange="updateTitle(); run();"></select>
+      <select id="hteam" onchange="// updateTitle() called only when teams selected run();"></select>
       <div class="field-label">xG per match</div>
       <div class="xg-input-wrap">
         <input type="number" id="hxg" value="1.70" step="0.01" min="0.10" max="5.00">
@@ -806,18 +806,19 @@ const $ = id => document.getElementById(id);
 function buildDropdowns() {
   ['hteam','ateam'].forEach((id, i) => {
     const sel = $(id);
-    const def = i === 0 ? 'Leeds United' : 'Tottenham';
+    const def = '';
     TEAMS.forEach(t => {
       const opt = document.createElement('option');
       opt.value = t; opt.textContent = t;
-      if (t === def) opt.selected = true;
+      if (t === def && def !== '') opt.selected = true;
       sel.appendChild(opt);
     });
   });
 }
 
 function updateTitle() {
-  $('match-title').textContent = $('hteam').value + ' vs ' + $('ateam').value;
+  var h = $('hteam').value, a = $('ateam').value;
+  $('match-title').textContent = (h && a) ? h + ' vs ' + a : 'Premier League 2026/27';
 }
 
 function swap() {
@@ -1356,32 +1357,46 @@ async function loadPlayers() {
 
 function renderPlayers(data) {
   var content = document.getElementById('players-content');
-  function playerTable(team, players) {
-    if (!players || players.length === 0) return '<div style="color:var(--text-3);font-size:12px;padding:1rem 0;">No player data available</div>';
-    return '<div style="font-size:12px;font-weight:500;color:var(--text-2);margin:1rem 0 0.5rem;">' + team + '</div>' +
-    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;">' +
-    '<thead><tr>' +
-    '<th style="text-align:left;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">Player</th>' +
-    '<th style="text-align:left;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">Pos</th>' +
-    '<th style="text-align:right;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">Scorer%</th>' +
-    '<th style="text-align:right;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">Yellow%</th>' +
-    '<th style="text-align:right;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">SoT/90</th>' +
-    '<th style="text-align:right;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">Ast/90</th>' +
-    '</tr></thead><tbody>' +
-    players.slice(0,15).map(function(p) {
-      var sc = p.goalscorer_prob >= 30 ? 'color:var(--green-text)' : p.goalscorer_prob >= 15 ? 'color:var(--text)' : 'color:var(--text-2)';
-      var yc = p.yellow_prob >= 30 ? 'color:var(--red-text)' : 'color:var(--text-2)';
-      return '<tr style="border-bottom:0.5px solid var(--border)">' +
-        '<td style="padding:7px 8px;color:var(--text);font-weight:500">' + p.name + '</td>' +
-        '<td style="padding:7px 8px;color:var(--text-3)">' + (p.position||'—') + '</td>' +
-        '<td style="padding:7px 8px;text-align:right;' + sc + '">' + p.goalscorer_prob + '%</td>' +
-        '<td style="padding:7px 8px;text-align:right;' + yc + '">' + p.yellow_prob + '%</td>' +
-        '<td style="padding:7px 8px;text-align:right;color:var(--text-2)">' + p.shots_on_p90.toFixed(2) + '</td>' +
-        '<td style="padding:7px 8px;text-align:right;color:var(--text-2)">' + p.assists_p90.toFixed(2) + '</td>' +
-      '</tr>';
-    }).join('') + '</tbody></table></div>';
+
+  function playerCard(team, players, accentColor) {
+    if (!players || players.length === 0) {
+      return '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid '+accentColor+'">'+team+'</div>' +
+        '<div style="font-size:11px;color:var(--text-3);">No data available</div></div>';
+    }
+    var rows = players.slice(0,12).map(function(p) {
+      var sc = p.goalscorer_prob >= 30 ? 'var(--green-text)' : p.goalscorer_prob >= 15 ? 'var(--text)' : 'var(--text-3)';
+      var yc = p.yellow_prob >= 30 ? 'var(--red-text)' : 'var(--text-3)';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border)">' +
+        '<div style="min-width:0;flex:1;overflow:hidden">' +
+          '<div style="font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + p.name + '</div>' +
+          '<div style="font-size:10px;color:var(--text-3)">' + (p.position||'') + '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;flex-shrink:0;margin-left:8px">' +
+          '<div style="text-align:center;min-width:36px">' +
+            '<div style="font-size:12px;font-weight:500;color:'+sc+'">' + p.goalscorer_prob + '%</div>' +
+            '<div style="font-size:9px;color:var(--text-3)">scorer</div>' +
+          '</div>' +
+          '<div style="text-align:center;min-width:32px">' +
+            '<div style="font-size:12px;font-weight:500;color:'+yc+'">' + p.yellow_prob + '%</div>' +
+            '<div style="font-size:9px;color:var(--text-3)">card</div>' +
+          '</div>' +
+          '<div style="text-align:center;min-width:28px">' +
+            '<div style="font-size:12px;color:var(--text-2)">' + p.shots_on_p90.toFixed(1) + '</div>' +
+            '<div style="font-size:9px;color:var(--text-3)">SoT</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div style="flex:1;min-width:0">' +
+      '<div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid '+accentColor+'">' + team + '</div>' +
+      rows +
+    '</div>';
   }
-  content.innerHTML = playerTable(data.home.team, data.home.players) + playerTable(data.away.team, data.away.players);
+
+  content.innerHTML = '<div style="display:flex;gap:16px;align-items:flex-start">' +
+    playerCard(data.home.team, data.home.players, 'var(--blue)') +
+    playerCard(data.away.team, data.away.players, 'var(--red)') +
+  '</div>';
 }
 
 function renderH2H(data) {
