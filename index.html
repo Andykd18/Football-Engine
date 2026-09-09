@@ -1375,65 +1375,54 @@ function renderPlayers(data) {
   var hCS = window._lastResult ? Math.exp(-(window._lastResult.awayLambda || 1.2)) : null;
   var aCS = window._lastResult ? Math.exp(-(window._lastResult.homeLambda || 1.2)) : null;
 
-  function playerCard(team, players, accentColor, csPct) {
+  function teamTable(team, players, accentColor, csPct) {
     if (!players || players.length === 0) {
-      return '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid '+accentColor+'">'+team+'</div>' +
+      return '<div style="margin-bottom:1.5rem">' +
+        '<div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid '+accentColor+'">'+team+'</div>' +
         '<div style="font-size:11px;color:var(--text-3);">No data available</div></div>';
     }
-    var rows = players.slice(0,12).map(function(p) {
+    var csPctVal = csPct != null ? (csPct * 100).toFixed(1) + '%' : null;
+    var rows = players.slice(0,15).map(function(p) {
       var isGK = p.position === 'Goalkeeper';
-      var sc = p.goalscorer_prob >= 30 ? 'var(--green-text)' : p.goalscorer_prob >= 15 ? 'var(--text)' : 'var(--text-3)';
-      var yc = p.yellow_prob >= 30 ? 'var(--red-text)' : 'var(--text-3)';
-      var statCols;
+      var sc = p.goalscorer_prob >= 30 ? 'var(--green-text)' : p.goalscorer_prob >= 15 ? 'var(--text)' : 'var(--text-2)';
+      var yc = p.yellow_prob >= 30 ? 'var(--red-text)' : 'var(--text-2)';
+      var nameCol = isGK ? 'var(--gold-text,#d4b84a)' : 'var(--text)';
       if (isGK) {
-        var csPctVal = csPct != null ? (csPct * 100).toFixed(1) + '%' : '—';
         var csCol = csPct != null && csPct > 0.3 ? 'var(--green-text)' : 'var(--text-2)';
-        statCols =
-          '<div style="text-align:center;min-width:44px">' +
-            '<div style="font-size:12px;font-weight:500;color:'+csCol+'">' + csPctVal + '</div>' +
-            '<div style="font-size:9px;color:var(--text-3)">clean sh.</div>' +
-          '</div>' +
-          '<div style="text-align:center;min-width:32px">' +
-            '<div style="font-size:12px;font-weight:500;color:'+yc+'">' + p.yellow_prob + '%</div>' +
-            '<div style="font-size:9px;color:var(--text-3)">card</div>' +
-          '</div>' +
-          '<div style="text-align:center;min-width:28px">' +
-            '<div style="font-size:12px;color:var(--text-2)">' + p.saves_p90.toFixed(1) + '</div>' +
-            '<div style="font-size:9px;color:var(--text-3)">saves</div>' +
-          '</div>';
-      } else {
-        statCols =
-          '<div style="text-align:center;min-width:36px">' +
-            '<div style="font-size:12px;font-weight:500;color:'+sc+'">' + p.goalscorer_prob + '%</div>' +
-            '<div style="font-size:9px;color:var(--text-3)">scorer</div>' +
-          '</div>' +
-          '<div style="text-align:center;min-width:32px">' +
-            '<div style="font-size:12px;font-weight:500;color:'+yc+'">' + p.yellow_prob + '%</div>' +
-            '<div style="font-size:9px;color:var(--text-3)">card</div>' +
-          '</div>' +
-          '<div style="text-align:center;min-width:28px">' +
-            '<div style="font-size:12px;color:var(--text-2)">' + p.shots_on_p90.toFixed(1) + '</div>' +
-            '<div style="font-size:9px;color:var(--text-3)">SoT</div>' +
-          '</div>';
+        return '<tr style="border-bottom:0.5px solid var(--border)">' +
+          '<td style="padding:7px 8px;color:'+nameCol+';font-weight:500;font-size:12px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.name + '</td>' +
+          '<td style="padding:7px 8px;color:var(--text-3);font-size:11px">GK</td>' +
+          '<td style="padding:7px 8px;text-align:right;color:'+csCol+';font-size:12px;font-weight:500" colspan="3">' + (csPctVal||'—') + ' clean sheet</td>' +
+          '<td style="padding:7px 8px;text-align:right;color:'+yc+';font-size:12px">' + p.yellow_prob + '%</td>' +
+        '</tr>';
       }
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border)">' +
-        '<div style="min-width:0;flex:1;overflow:hidden">' +
-          '<div style="font-size:12px;font-weight:500;color:' + (isGK ? 'var(--gold-text,#d4b84a)' : 'var(--text)') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + p.name + '</div>' +
-          '<div style="font-size:10px;color:var(--text-3)">' + (p.position||'') + '</div>' +
-        '</div>' +
-        '<div style="display:flex;gap:8px;flex-shrink:0;margin-left:8px">' + statCols + '</div>' +
-      '</div>';
+      return '<tr style="border-bottom:0.5px solid var(--border)">' +
+        '<td style="padding:7px 8px;color:'+nameCol+';font-weight:500;font-size:12px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.name + '</td>' +
+        '<td style="padding:7px 8px;color:var(--text-3);font-size:11px">' + (p.position||'').slice(0,3) + '</td>' +
+        '<td style="padding:7px 8px;text-align:right;color:'+sc+';font-size:12px;font-weight:500">' + p.goalscorer_prob + '%</td>' +
+        '<td style="padding:7px 8px;text-align:right;color:'+yc+';font-size:12px">' + p.yellow_prob + '%</td>' +
+        '<td style="padding:7px 8px;text-align:right;color:var(--text-2);font-size:12px">' + p.shots_on_p90.toFixed(1) + '</td>' +
+        '<td style="padding:7px 8px;text-align:right;color:var(--text-2);font-size:12px">' + p.assists_p90.toFixed(1) + '</td>' +
+      '</tr>';
     }).join('');
-    return '<div style="flex:1;min-width:0">' +
+
+    return '<div style="margin-bottom:1.5rem">' +
       '<div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid '+accentColor+'">' + team + '</div>' +
-      rows +
-    '</div>';
+      '<table style="width:100%;border-collapse:collapse;table-layout:fixed">' +
+      '<thead><tr>' +
+        '<th style="text-align:left;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid);width:35%">Player</th>' +
+        '<th style="text-align:left;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid);width:10%">Pos</th>' +
+        '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">Scorer</th>' +
+        '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">Card</th>' +
+        '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">SoT</th>' +
+        '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">Ast</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody></table></div>';
   }
 
-  content.innerHTML = '<div style="display:flex;gap:16px;align-items:flex-start">' +
-    playerCard(data.home.team, data.home.players, 'var(--blue)', hCS) +
-    playerCard(data.away.team, data.away.players, 'var(--red)', aCS) +
-  '</div>';
+  content.innerHTML =
+    teamTable(data.home.team, data.home.players, 'var(--blue)', hCS) +
+    teamTable(data.away.team, data.away.players, 'var(--red)', aCS);
 }
 
 function renderH2H(data) {
@@ -1476,7 +1465,22 @@ function renderH2H(data) {
     row('Fouls committed / 90', sumF(hP,'fouls_p90'), sumF(aP,'fouls_p90'), false) +
     row('Fouls drawn / 90', sumF(hP,'fouled_p90'), sumF(aP,'fouled_p90'), true) +
     row('Tackles / 90 (team)', sumF(hP,'tackles_p90'), sumF(aP,'tackles_p90'), true) +
-    row('Home clean sheet', window._lastResult ? (Math.exp(-window._lastResult.awayLambda)*100).toFixed(1)+'%' : '—', window._lastResult ? (Math.exp(-window._lastResult.homeLambda)*100).toFixed(1)+'%' : '—', true) +
+    (function() {
+      var hGK = hP.find(function(p){return p.position==='Goalkeeper';});
+      var aGK = aP.find(function(p){return p.position==='Goalkeeper';});
+      var hCSv = window._lastResult ? (Math.exp(-window._lastResult.awayLambda)*100).toFixed(1)+'%' : '—';
+      var aCSv = window._lastResult ? (Math.exp(-window._lastResult.homeLambda)*100).toFixed(1)+'%' : '—';
+      var hLabel = 'Clean sheet' + (hGK ? ' (' + hGK.name.split(' ').pop() + ')' : '');
+      var aLabel = hLabel;
+      var hw = window._lastResult ? Math.exp(-window._lastResult.awayLambda) >= Math.exp(-window._lastResult.homeLambda) : false;
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
+        '<div style="font-size:13px;' + (hw?'color:var(--green-text);font-weight:500':'color:var(--text-2)') + '">' + hCSv + '</div>' +
+        '<div style="font-size:11px;color:var(--text-3);text-align:center">' +
+          (hGK ? hGK.name.split(' ').pop() : 'Home') + ' v ' + (aGK ? aGK.name.split(' ').pop() : 'Away') + ' clean sheet' +
+        '</div>' +
+        '<div style="font-size:13px;' + (!hw?'color:var(--green-text);font-weight:500':'color:var(--text-2)') + '">' + aCSv + '</div>' +
+      '</div>';
+    })() +
     row('Top scorer chance', top1(hP,'goalscorer_prob') ? top1(hP,'goalscorer_prob').goalscorer_prob+'%' : '—', top1(aP,'goalscorer_prob') ? top1(aP,'goalscorer_prob').goalscorer_prob+'%' : '—', true) +
     row('Highest card risk', top1(hP,'yellow_prob') ? top1(hP,'yellow_prob').yellow_prob+'%' : '—', top1(aP,'yellow_prob') ? top1(aP,'yellow_prob').yellow_prob+'%' : '—', false) +
     '<div style="margin-top:1rem">' +
