@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing Engine</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ACCAdemy">
-<meta name="theme-color" content="#1c1c1a">
+<meta name="theme-color" content="#1a1012">
 <link rel="apple-touch-icon" href="icon-192x192.png">
-<title>Pricing Engine</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -39,8 +39,7 @@
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     background: var(--bg);
-    background-image: radial-gradient(ellipse at top left, rgba(120,20,20,0.18) 0%, transparent 60%),
-                      radial-gradient(ellipse at bottom right, rgba(90,15,15,0.12) 0%, transparent 60%);
+    background-image: radial-gradient(ellipse at top left, rgba(120,20,20,0.18) 0%, transparent 60%), radial-gradient(ellipse at bottom right, rgba(90,15,15,0.12) 0%, transparent 60%);
     background-attachment: fixed;
     color: var(--text);
     min-height: 100vh;
@@ -528,73 +527,6 @@
 
   .acca-add-btn:hover { color: var(--text); }
 
-  /* ── Export button ── */
-  .export-btn {
-    width: 100%;
-    padding: 9px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: inherit;
-    cursor: pointer;
-    border: 0.5px solid var(--border-mid);
-    border-radius: var(--radius-sm);
-    background: var(--surface2);
-    color: var(--text-2);
-    margin-top: 10px;
-    transition: background .15s, color .15s;
-  }
-  .export-btn:hover { background: var(--surface); color: var(--text); }
-
-
-  /* ── Fixture picker ── */
-  .fixture-picker {
-    margin-bottom: 1rem;
-  }
-
-  .fixture-picker-label {
-    font-size: 11px;
-    color: var(--text-3);
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    font-weight: 500;
-  }
-
-  .fixture-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .fixture-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-family: inherit;
-    color: var(--text);
-    transition: border-color .15s, background .15s;
-    text-align: left;
-  }
-
-  .fixture-btn:hover { border-color: var(--border-mid); background: var(--surface2); }
-  .fixture-btn.active { border-color: var(--blue-text); background: var(--blue-light); }
-
-  .fixture-match { font-size: 13px; font-weight: 500; }
-  .fixture-date  { font-size: 11px; color: var(--text-3); }
-
-  .fixture-loading {
-    font-size: 12px;
-    color: var(--text-3);
-    padding: 8px 0;
-  }
-
-
-  /* Match setup button */
   .setup-btn {
     width: 100%; padding: 10px 14px; font-size: 13px;
     font-weight: 500; font-family: inherit; cursor: pointer;
@@ -604,21 +536,15 @@
     justify-content: space-between; transition: all .15s;
   }
   .setup-btn:hover { background: var(--surface2); color: var(--text); }
-
-  /* Tab bar */
   .tab-bar {
     display: flex; gap: 4px; margin-bottom: 1rem;
-    overflow-x: auto; padding-bottom: 2px;
-    scrollbar-width: none;
+    overflow-x: auto; padding-bottom: 2px; scrollbar-width: none;
   }
   .tab-bar::-webkit-scrollbar { display: none; }
-
   .tab-btn {
-    flex-shrink: 0;
-    padding: 7px 14px; font-size: 12px; font-weight: 500;
+    flex-shrink: 0; padding: 7px 14px; font-size: 12px; font-weight: 500;
     font-family: inherit; cursor: pointer;
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border); border-radius: var(--radius-sm);
     background: var(--surface); color: var(--text-2);
     transition: all .15s; white-space: nowrap;
     display: flex; align-items: center; gap: 6px;
@@ -626,22 +552,27 @@
   .tab-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border-mid); }
   .tab-btn.active { background: var(--red); color: #fff; border-color: var(--red); }
   .tab-btn i { font-size: 13px; pointer-events: none; }
-
-  /* Tab panels */
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
-
-  .collapsible-arrow {
-    font-size: 13px; color: var(--text-3);
-    transition: transform .2s ease;
-    pointer-events: none;
+  .fixture-picker { margin-bottom: 1rem; }
+  .fixture-picker-label { font-size: 11px; color: var(--text-3); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .06em; font-weight: 500; }
+  .fixture-list { display: flex; flex-direction: column; gap: 6px; }
+  .fixture-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); cursor: pointer; font-family: inherit;
+    color: var(--text); transition: border-color .15s, background .15s; text-align: left;
   }
+  .fixture-btn:hover { border-color: var(--border-mid); background: var(--surface2); }
+  .fixture-btn.active { border-color: var(--blue-text); background: var(--blue-light); }
+  .fixture-match { font-size: 13px; font-weight: 500; }
+  .fixture-date  { font-size: 11px; color: var(--text-3); }
+  .fixture-loading { font-size: 12px; color: var(--text-3); padding: 8px 0; }
+  .collapsible-arrow { font-size: 13px; color: var(--text-3); transition: transform .2s ease; pointer-events: none; }
   .collapsible-arrow.rotated { transform: rotate(180deg); }
-  .collapsible-body { overflow: hidden; }
-
 </style>
+</head>
 <body>
-
 <div class="page">
 
   <header>
@@ -665,7 +596,7 @@
   </button>
 
   <div id="pitch-body" style="display:none;overflow:hidden;">
-    <div class="pitch">
+  <div class="pitch">
     <div class="team-card home">
       <div class="team-pill">Home</div>
       <select id="hteam" onchange="updateTitle(); run();"></select>
@@ -712,7 +643,8 @@
       <div class="odds-hint" id="aodds-hint">= 1.80</div>
     </div>
   </div>
-    <div class="settings">
+
+  <div class="settings">
     <label>Min edge</label>
     <input type="range" min="1" max="20" step="1" value="5" id="edge-sl">
     <span class="sval" id="edge-v">5%</span>
@@ -729,7 +661,9 @@
     <button class="calc-btn" onclick="calculate()">Calculate</button>
   </div>
   <div class="fetch-status" id="fetch-status"></div>
-  <div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:4px;margin-bottom:1.5rem;">
+
+  <div class="section-title">Outcome probabilities</div>
+  <div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:4px;margin-bottom:0.75rem;">
     Had a big win? Share the love with the creator <a href="https://revolut.me/andrewo0n3" target="_blank" style="color:var(--text-3);text-decoration:underline;">here</a> on Revolut
   </div>
   </div>
@@ -743,34 +677,9 @@
     <button class="tab-btn" onclick="switchTab('tab-acca', this)"><i class="ti ti-stack" aria-hidden="true"></i>Acca</button>
   </div>
 
-  <div id="tab-op" class="tab-panel active">
-    <div class="outcomes">
-    <div class="oc">
-      <div class="oc-bar" id="hbar" style="background:var(--blue);width:0%"></div>
-      <div class="oc-lbl" id="hlbl">Home win</div>
-      <div class="oc-pct" id="hpct">—</div>
-      <div class="oc-imp" id="himp">—</div>
-      <span class="badge bf" id="hbadge">—</span>
-    </div>
-    <div class="oc">
-      <div class="oc-bar" id="dbar" style="background:var(--green);width:0%"></div>
-      <div class="oc-lbl">Draw</div>
-      <div class="oc-pct" id="dpct">—</div>
-      <div class="oc-imp" id="dimp">—</div>
-      <span class="badge bf" id="dbadge">—</span>
-    </div>
-    <div class="oc">
-      <div class="oc-bar" id="abar" style="background:var(--red);width:0%"></div>
-      <div class="oc-lbl" id="albl">Away win</div>
-      <div class="oc-pct" id="apct">—</div>
-      <div class="oc-imp" id="aimp">—</div>
-      <span class="badge bf" id="abadge">—</span>
-    </div>
-  </div>
-  </div>
-
-  <div id="tab-def" class="tab-panel">
-    <div class="outcomes" id="def-stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">
+  <div id="tab-op" class="tab-panel active"></div>
+  <div id="tab-def" class="tab-panel"><div class="section-title" style="margin-top:1.5rem">Defensive &amp; market stats</div>
+  <div class="outcomes" id="def-stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">
     <div class="oc">
       <div class="oc-lbl">BTTS</div>
       <div class="oc-pct" id="btts-pct">—</div>
@@ -801,77 +710,8 @@
       <div class="oc-imp" id="acs-sub">—</div>
     </div>
   </div>
-  </div>
 
-  <div id="tab-cc" class="tab-panel">
-    <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
-    <div class="oc">
-      <div class="oc-bar" id="hc-bar" style="background:var(--blue);width:0%"></div>
-      <div class="oc-lbl" id="hc-lbl">Home corners</div>
-      <div class="oc-pct" id="hc-avg">—</div>
-      <div class="oc-imp" id="hc-sub">Avg per match</div>
-    </div>
-    <div class="oc">
-      <div class="oc-bar" id="ac-bar" style="background:var(--red);width:0%"></div>
-      <div class="oc-lbl" id="ac-lbl">Away corners</div>
-      <div class="oc-pct" id="ac-avg">—</div>
-      <div class="oc-imp" id="ac-sub">Avg per match</div>
-    </div>
-  </div>
-  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
-    <div class="oc">
-      <div class="oc-lbl" id="hy-lbl">Home yellow cards</div>
-      <div class="oc-pct" id="hy-avg">—</div>
-      <div class="oc-imp" id="hy-sub">Avg per match</div>
-    </div>
-    <div class="oc">
-      <div class="oc-lbl" id="ay-lbl">Away yellow cards</div>
-      <div class="oc-pct" id="ay-avg">—</div>
-      <div class="oc-imp" id="ay-sub">Avg per match</div>
-    </div>
-  </div>
-  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
-    <div class="oc">
-      <div class="oc-lbl" id="hr-lbl">Home red cards</div>
-      <div class="oc-pct" id="hr-avg">—</div>
-      <div class="oc-imp" id="hr-sub">Avg per match</div>
-    </div>
-    <div class="oc">
-      <div class="oc-lbl" id="ar-lbl">Away red cards</div>
-      <div class="oc-pct" id="ar-avg">—</div>
-      <div class="oc-imp" id="ar-sub">Avg per match</div>
-    </div>
-  </div>
-  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
-    <div class="oc">
-      <div class="oc-bar" id="hs-bar" style="background:var(--blue);width:0%"></div>
-      <div class="oc-lbl" id="hs-lbl">Home total shots</div>
-      <div class="oc-pct" id="hs-avg">—</div>
-      <div class="oc-imp" id="hs-sub">Avg per match</div>
-    </div>
-    <div class="oc">
-      <div class="oc-bar" id="as-bar" style="background:var(--red);width:0%"></div>
-      <div class="oc-lbl" id="as-lbl">Away total shots</div>
-      <div class="oc-pct" id="as-avg">—</div>
-      <div class="oc-imp" id="as-sub">Avg per match</div>
-    </div>
-  </div>
-  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
-    <div class="oc">
-      <div class="oc-lbl" id="hf-lbl">Home fouls</div>
-      <div class="oc-pct" id="hf-avg">—</div>
-      <div class="oc-imp" id="hf-sub">Avg per match</div>
-    </div>
-    <div class="oc">
-      <div class="oc-lbl" id="af-lbl">Away fouls</div>
-      <div class="oc-pct" id="af-avg">—</div>
-      <div class="oc-imp" id="af-sub">Avg per match</div>
-    </div>
-  </div>
-  </div>
-
-  <div id="tab-scores" class="tab-panel">
-    <div style="height:10px"></div>
+  <div class="section-title">Most likely scorelines</div>
   <div class="scorelines" id="bars"></div>
 
   <div class="section-title">
@@ -882,23 +722,16 @@
   <div class="matrix-legend" id="legend"></div>
 
   <!-- History -->
-  </div>
-
-  <div id="tab-hist" class="tab-panel">
-    <div class="history-wrap" id="history-wrap" style="border-top:none;padding-top:0.5rem">
+  <div class="history-wrap" id="history-wrap">
     <div class="history-header">
       <div class="section-title" style="margin-bottom:0">Search history</div>
       <button class="clear-btn" onclick="clearHistory()">Clear all</button>
     </div>
-    <button class="export-btn" onclick="exportCSV()">⬇ Export to CSV</button>
     <div id="history-list"><div class="history-empty">No searches yet — run a calculation to save it here.</div></div>
   </div>
 
   <!-- Acca builder -->
-  </div>
-
-  <div id="tab-acca" class="tab-panel">
-    <div class="acca-wrap" id="acca-wrap" style="margin-top:0">
+  <div class="acca-wrap" id="acca-wrap">
     <div class="acca-header">
       <h3>Acca builder</h3>
       <span class="acca-meta" id="acca-meta">0 legs</span>
@@ -915,11 +748,465 @@
       </div>
     </div>
   </div>
-  </div>
 
 </div>
-
 <script>
+const TEAMS = [
+  "Arsenal","Aston Villa","Bournemouth","Brentford","Brighton",
+  "Chelsea","Coventry City","Crystal Palace","Everton","Fulham",
+  "Hull City","Ipswich Town","Leeds United","Liverpool",
+  "Manchester City","Manchester United","Newcastle United",
+  "Nottingham Forest","Sunderland","Tottenham"
+].sort();
+
+const $ = id => document.getElementById(id);
+
+function buildDropdowns() {
+  ['hteam','ateam'].forEach((id, i) => {
+    const sel = $(id);
+    const def = i === 0 ? 'Leeds United' : 'Tottenham';
+    TEAMS.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = t;
+      if (t === def) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function updateTitle() {
+  $('match-title').textContent = $('hteam').value + ' vs ' + $('ateam').value;
+}
+
+function swap() {
+  const ht = $('hteam').value,  at = $('ateam').value;
+  const hx = $('hxg').value,    ax = $('axg').value;
+  const hxa = $('hxga').value,  axa = $('axga').value;
+  const ho = $('hodds').value,  ao = $('aodds').value;
+  $('hteam').value = at;  $('ateam').value = ht;
+  $('hxg').value   = ax;  $('axg').value   = hx;
+  $('hxga').value  = axa; $('axga').value  = hxa;
+  $('hodds').value = ao;  $('aodds').value = ho;
+  updateTitle(); run();
+}
+
+// ── Backend fetch ────────────────────────────────────────
+
+const SERVER = "https://football-engine-production.up.railway.app";
+
+async function fetchData() {
+  const home = $('hteam').value;
+  const away = $('ateam').value;
+  const btn  = $('fetch-btn');
+  const status = $('fetch-status');
+
+  btn.classList.add('loading');
+  btn.textContent = 'Fetching...';
+  status.className = 'fetch-status';
+  status.textContent = 'Contacting server...';
+
+  try {
+    const res = await fetch(`${SERVER}/api/match?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}`);
+    const data = await res.json();
+
+    let msgs = [];
+
+    // xG
+    if (data.xg && !data.xg.error) {
+      $('hxg').value = data.xg.home_lambda;
+      $('axg').value = data.xg.away_lambda;
+      msgs.push(`xG loaded (last ${data.xg.home.matches_used} matches)`);
+    } else if (data.xg?.error) {
+      msgs.push(`xG: ${data.xg.error}`);
+    }
+
+    // Odds
+    if (data.odds && !data.odds.error) {
+      $('hodds').value = data.odds.home_odds ? decimalToFraction(data.odds.home_odds) : $('hodds').value;
+      $('dodds').value = data.odds.draw_odds ? decimalToFraction(data.odds.draw_odds) : $('dodds').value;
+      $('aodds').value = data.odds.away_odds ? decimalToFraction(data.odds.away_odds) : $('aodds').value;
+      updateHint('hodds', 'hodds-hint');
+      updateHint('dodds', 'dodds-hint');
+      updateHint('aodds', 'aodds-hint');
+      msgs.push(`odds from ${data.odds.bookmaker}`);
+    } else if (data.odds?.error) {
+      msgs.push(`odds: ${data.odds.error}`);
+    }
+
+    const allOk = msgs.every(m => !m.toLowerCase().includes('error') && !m.toLowerCase().includes('not found'));
+    status.className = 'fetch-status ' + (allOk ? 'ok' : 'err');
+    status.textContent = msgs.join(' · ');
+    calculate();
+
+  } catch (e) {
+    status.className = 'fetch-status err';
+    status.textContent = 'Server not running — start server.py first (python server.py)';
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '↓ Fetch xG & odds';
+  }
+}
+
+// ── End backend fetch ─────────────────────────────────────
+
+
+function decimalToFraction(decimal) {
+  // Convert decimal odds to fractional (e.g. 4.0 -> "3/1", 2.5 -> "3/2")
+  const numerator = decimal - 1;
+  // Find a good fraction representation
+  const tolerance = 0.01;
+  for (let denom = 1; denom <= 20; denom++) {
+    const num = Math.round(numerator * denom);
+    if (Math.abs(num / denom - numerator) < tolerance) {
+      // Simplify by GCD
+      const g = gcd(num, denom);
+      return `${num/g}/${denom/g}`;
+    }
+  }
+  // Fallback: round to 2 decimal places
+  return decimal.toFixed(2);
+}
+
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+function parseOdds(val) {
+  val = val.trim();
+  if (val.includes('/')) {
+    const parts = val.split('/');
+    if (parts.length === 2) {
+      const n = parseFloat(parts[0]), d = parseFloat(parts[1]);
+      if (!isNaN(n) && !isNaN(d) && d !== 0) return (n / d) + 1;
+    }
+    return NaN;
+  }
+  const dec = parseFloat(val);
+  return dec >= 1 ? dec : NaN;
+}
+
+function updateHint(inputId, hintId) {
+  const el = document.getElementById(inputId);
+  const hint = document.getElementById(hintId);
+  if (!hint) return;
+  const dec = parseOdds(el.value);
+  if (isNaN(dec)) {
+    hint.textContent = 'invalid';
+    el.classList.add('invalid');
+  } else {
+    hint.textContent = '= ' + dec.toFixed(2);
+    el.classList.remove('invalid');
+  }
+}
+
+$('edge-sl').oninput = () => { $('edge-v').textContent = $('edge-sl').value + '%'; run(); };
+$('ha').onchange = run;
+['hxg','axg','hxga','axga'].forEach(id => $(id).addEventListener('input', run));
+['hodds','dodds','aodds'].forEach(id => {
+  $(id).addEventListener('input', () => {
+    updateHint(id, id + '-hint');
+    run();
+  });
+});
+
+function poisson(lam, k) {
+  if (k < 0) return 0;
+  let lp = -lam + k * Math.log(lam);
+  for (let i = 2; i <= k; i++) lp -= Math.log(i);
+  return Math.exp(lp);
+}
+
+function setBadge(el, edge, min) {
+  if (edge >= min)       { el.className = 'badge bv'; el.textContent = '+' + (edge*100).toFixed(1) + '% value'; }
+  else if (edge <= -min) { el.className = 'badge ba'; el.textContent = 'overpriced'; }
+  else                   { el.className = 'badge bf'; el.textContent = 'fair'; }
+}
+
+function run() {
+  const ha   = $('ha').checked ? 1.10 : 1.0;
+  const hxgF = parseFloat($('hxg').value)  || 1.5;
+  const axgF = parseFloat($('axg').value)  || 1.5;
+  const hxgA = parseFloat($('hxga').value) || 1.2;
+  const axgA = parseFloat($('axga').value) || 1.2;
+
+  // Blend attack vs opposition defence for more accurate lambdas
+  const hl = ((hxgF + axgA) / 2) * ha;
+  const al = ((axgF + hxgA) / 2) / ha;
+  const hOdds = parseOdds($('hodds').value);
+  const dOdds = parseOdds($('dodds').value);
+  const aOdds = parseOdds($('aodds').value);
+  const minEdge = parseFloat($('edge-sl').value) / 100;
+  const hName = $('hteam').value;
+  const aName = $('ateam').value;
+  const MAX = 7;
+
+  if (!hl || !al || !hOdds || !dOdds || !aOdds) return;
+
+  $('hlbl').textContent = hName + ' win';
+  $('albl').textContent = aName + ' win';
+
+  let grid = [], hw = 0, aw = 0, dr = 0;
+  for (let h = 0; h <= MAX; h++) {
+    grid[h] = [];
+    for (let a = 0; a <= MAX; a++) {
+      const p = poisson(hl, h) * poisson(al, a);
+      grid[h][a] = p;
+      if (h > a) hw += p; else if (a > h) aw += p; else dr += p;
+    }
+  }
+  const tot = hw + aw + dr;
+  hw /= tot; aw /= tot; dr /= tot;
+
+  const himp = 1/hOdds, aimp = 1/aOdds, dimp = 1/dOdds;
+
+  $('hpct').textContent = (hw*100).toFixed(1)+'%';
+  $('dpct').textContent = (dr*100).toFixed(1)+'%';
+  $('apct').textContent = (aw*100).toFixed(1)+'%';
+  $('himp').textContent = 'implied '+(himp*100).toFixed(1)+'%';
+  $('dimp').textContent = 'implied '+(dimp*100).toFixed(1)+'%';
+  $('aimp').textContent = 'implied '+(aimp*100).toFixed(1)+'%';
+  $('hbar').style.width = (hw*100).toFixed(1)+'%';
+  $('dbar').style.width = (dr*100).toFixed(1)+'%';
+  $('abar').style.width = (aw*100).toFixed(1)+'%';
+  setBadge($('hbadge'), hw-himp, minEdge);
+  setBadge($('dbadge'), dr-dimp, minEdge);
+  setBadge($('abadge'), aw-aimp, minEdge);
+
+  // ── Defensive & market stats ──
+  // BTTS: both teams score at least 1
+  let btts = 0, o25 = 0, u25 = 0;
+  for (let h = 0; h <= MAX; h++) {
+    for (let a = 0; a <= MAX; a++) {
+      const p = grid[h][a];
+      if (h >= 1 && a >= 1) btts += p;
+      if (h + a > 2.5)      o25  += p;
+      if (h + a < 2.5)      u25  += p;
+    }
+  }
+
+  // Clean sheet: team concedes 0
+  let hCS = 0, aCS = 0;
+  for (let h = 0; h <= MAX; h++) hCS += grid[h][0]; // home keeps clean sheet (away scores 0)
+  for (let a = 0; a <= MAX; a++) aCS += grid[0][a]; // away keeps clean sheet (home scores 0)
+
+  $('btts-pct').textContent = (btts*100).toFixed(1) + '%';
+  $('o25-pct').textContent  = (o25*100).toFixed(1)  + '%';
+  $('u25-pct').textContent  = (u25*100).toFixed(1)  + '%';
+  $('btts-sub').textContent = btts > 0.55 ? 'Likely' : btts > 0.45 ? 'Marginal' : 'Unlikely';
+  $('o25-sub').textContent  = o25  > 0.55 ? 'Likely' : o25  > 0.45 ? 'Marginal' : 'Unlikely';
+  $('u25-sub').textContent  = u25  > 0.55 ? 'Likely' : u25  > 0.45 ? 'Marginal' : 'Unlikely';
+
+  $('hcs-lbl').textContent = hName + ' clean sheet';
+  $('acs-lbl').textContent = aName + ' clean sheet';
+  $('hcs-pct').textContent = (hCS*100).toFixed(1) + '%';
+  $('acs-pct').textContent = (aCS*100).toFixed(1) + '%';
+  $('hcs-bar').style.width = (hCS*100).toFixed(1) + '%';
+  $('acs-bar').style.width = (aCS*100).toFixed(1) + '%';
+
+  const hxgF2 = parseFloat($('hxg').value), hxgA2 = parseFloat($('hxga').value);
+  const axgF2 = parseFloat($('axg').value), axgA2 = parseFloat($('axga').value);
+  $('hcs-sub').textContent = `xG for ${hxgF2.toFixed(2)} · xGA ${hxgA2.toFixed(2)}`;
+  $('acs-sub').textContent = `xG for ${axgF2.toFixed(2)} · xGA ${axgA2.toFixed(2)}`;
+
+  const scores = [];
+  for (let h = 0; h <= MAX; h++)
+    for (let a = 0; a <= MAX; a++)
+      scores.push({h, a, p: grid[h][a]});
+  scores.sort((a,b) => b.p - a.p);
+
+  const top8 = scores.slice(0,8), maxP = top8[0].p;
+  const cols = {home:'#185FA5', away:'#A32D2D', draw:'#3B6D11'};
+  $('bars').innerHTML = top8.map(s => {
+    const type = s.h > s.a ? 'home' : s.a > s.h ? 'away' : 'draw';
+    const w = Math.round(s.p / maxP * 100);
+    return `<div class="bar-row"><div class="bar-score">${s.h}–${s.a}</div><div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${cols[type]}">${(s.p*100).toFixed(1)}%</div></div></div>`;
+  }).join('');
+
+  const maxCell = Math.max(...scores.map(s => s.p));
+  let html = `<div class="matrix-grid" style="grid-template-columns:22px repeat(${MAX+1},1fr);gap:3px">`;
+  html += '<div class="acell"></div>';
+  for (let a = 0; a <= MAX; a++) html += `<div class="acell">${a}</div>`;
+  for (let h = 0; h <= MAX; h++) {
+    html += `<div class="acell">${h}</div>`;
+    for (let a = 0; a <= MAX; a++) {
+      const p = grid[h][a], inten = Math.min(p/maxCell, 1);
+      let bg, tc;
+      if (h > a)      { bg=`rgba(24,95,165,${(.08+inten*.88).toFixed(2)})`;  tc=inten>.5?'#ddeeff':'#185FA5'; }
+      else if (a > h) { bg=`rgba(163,45,45,${(.08+inten*.88).toFixed(2)})`; tc=inten>.5?'#ffdddd':'#A32D2D'; }
+      else            { bg=`rgba(59,109,17,${(.08+inten*.88).toFixed(2)})`;  tc=inten>.5?'#ddeedd':'#3B6D11'; }
+      html += `<div class="mcell" style="background:${bg};color:${tc}">${(p*100).toFixed(1)}</div>`;
+    }
+  }
+  html += '</div>';
+  $('matrix').innerHTML = html;
+  $('legend').innerHTML = `
+    <div class="leg-item"><div class="leg-dot" style="background:#185FA5"></div>${hName} win</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#3B6D11"></div>Draw</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#A32D2D"></div>${aName} win</div>`;
+
+  // Store result so calculate() can save it to history
+  window._lastResult = { hName, aName, hw, dr, aw, himp, dimp, aimp, minEdge };
+}
+
+function calculate() {
+  run();
+  if (!window._lastResult) return;
+  const r = window._lastResult;
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) +
+                  ' · ' + now.toLocaleDateString([], {day:'numeric', month:'short'});
+  saveHistory({
+    home: r.hName, away: r.aName,
+    hxg: $('hxg').value, axg: $('axg').value,
+    hodds: $('hodds').value, dodds: $('dodds').value, aodds: $('aodds').value,
+    hProb: r.hw, dProb: r.dr, aProb: r.aw,
+    hImp: r.himp, dImp: r.dimp, aImp: r.aimp,
+    minEdge: r.minEdge, time: timeStr,
+  });
+}
+
+// ── History & Acca ───────────────────────────────────────
+
+let history = JSON.parse(localStorage.getItem('pe_history') || '[]');
+let acca = JSON.parse(localStorage.getItem('pe_acca') || '[]');
+
+function saveHistory(entry) {
+  history.unshift(entry);
+  if (history.length > 20) history = history.slice(0, 20);
+  localStorage.setItem('pe_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function clearHistory() {
+  history = []; acca = [];
+  localStorage.removeItem('pe_history');
+  localStorage.removeItem('pe_acca');
+  renderHistory();
+  renderAcca();
+}
+
+function loadFromHistory(entry) {
+  // Set teams
+  $('hteam').value = entry.home;
+  $('ateam').value = entry.away;
+  $('hxg').value   = entry.hxg;
+  $('axg').value   = entry.axg;
+  $('hodds').value = entry.hodds;
+  $('dodds').value = entry.dodds;
+  $('aodds').value = entry.aodds;
+  updateTitle();
+  updateHint('hodds','hodds-hint');
+  updateHint('dodds','dodds-hint');
+  updateHint('aodds','aodds-hint');
+  run();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function addToAcca(entry, selection, odds) {
+  // Prevent duplicate matches
+  if (acca.find(l => l.home === entry.home && l.away === entry.away)) {
+    // Replace existing leg for same match
+    acca = acca.filter(l => !(l.home === entry.home && l.away === entry.away));
+  }
+  acca.push({ home: entry.home, away: entry.away, selection, odds });
+  localStorage.setItem('pe_acca', JSON.stringify(acca));
+  renderAcca();
+}
+
+function removeAccaLeg(idx) {
+  acca.splice(idx, 1);
+  localStorage.setItem('pe_acca', JSON.stringify(acca));
+  renderAcca();
+}
+
+function renderAcca() {
+  const wrap = $('acca-wrap');
+  const legsEl = $('acca-legs');
+  const metaEl = $('acca-meta');
+  const totalEl = $('acca-total');
+  const probEl  = $('acca-prob');
+
+  if (acca.length === 0) {
+    wrap.classList.remove('visible');
+    return;
+  }
+
+  wrap.classList.add('visible');
+  metaEl.textContent = acca.length + (acca.length === 1 ? ' leg' : ' legs');
+
+  legsEl.innerHTML = acca.map((leg, i) => `
+    <div class="acca-leg">
+      <div class="acca-leg-match">${leg.home} vs ${leg.away}</div>
+      <div class="acca-leg-sel">${leg.selection}</div>
+      <div class="acca-leg-odds">${leg.odds.toFixed(2)}</div>
+      <button class="acca-leg-remove" onclick="removeAccaLeg(${i})">×</button>
+    </div>
+  `).join('');
+
+  const combined = acca.reduce((acc, leg) => acc * leg.odds, 1);
+  const impliedPct = (1 / combined * 100).toFixed(1);
+  totalEl.textContent = combined.toFixed(2);
+  probEl.textContent  = impliedPct + '%';
+}
+
+function renderHistory() {
+  const list = $('history-list');
+  if (history.length === 0) {
+    list.innerHTML = '<div class="history-empty">No searches yet — run a calculation to save it here.</div>';
+    return;
+  }
+
+  list.innerHTML = history.map((e, i) => {
+    const hEdge = ((e.hProb - e.hImp) * 100).toFixed(1);
+    const dEdge = ((e.dProb - e.dImp) * 100).toFixed(1);
+    const aEdge = ((e.aProb - e.aImp) * 100).toFixed(1);
+
+    function edgeClass(edge) {
+      return parseFloat(edge) >= e.minEdge * 100 ? 'val' : parseFloat(edge) <= -e.minEdge * 100 ? 'over' : '';
+    }
+
+    const hClass = edgeClass(hEdge);
+    const dClass = edgeClass(dEdge);
+    const aClass = edgeClass(aEdge);
+
+    const hLabel = e.home + ' win';
+    const dLabel = 'Draw';
+    const aLabel = e.away + ' win';
+
+    return `<div class="history-item" onclick="loadFromHistory(history[${i}])">
+      <div class="history-match">
+        <span>${e.home} vs ${e.away}</span>
+        <span class="history-time">${e.time}</span>
+      </div>
+      <div class="history-stats">
+        <span class="hstat ${hClass}">
+          ${hLabel} ${(e.hProb*100).toFixed(1)}%
+          <button class="acca-add-btn" onclick="event.stopPropagation(); addToAcca(history[${i}], '${hLabel}', ${parseOdds(e.hodds).toFixed(4)})">+ acca</button>
+        </span>
+        <span class="hstat ${dClass}">
+          ${dLabel} ${(e.dProb*100).toFixed(1)}%
+          <button class="acca-add-btn" onclick="event.stopPropagation(); addToAcca(history[${i}], '${dLabel}', ${parseOdds(e.dodds).toFixed(4)})">+ acca</button>
+        </span>
+        <span class="hstat ${aClass}">
+          ${aLabel} ${(e.aProb*100).toFixed(1)}%
+          <button class="acca-add-btn" onclick="event.stopPropagation(); addToAcca(history[${i}], '${aLabel}', ${parseOdds(e.aodds).toFixed(4)})">+ acca</button>
+        </span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── End History & Acca ────────────────────────────────────
+
+buildDropdowns();
+updateTitle();
+updateHint('hodds', 'hodds-hint');
+updateHint('dodds', 'dodds-hint');
+updateHint('aodds', 'aodds-hint');
+renderHistory();
+renderAcca();
+run();
+loadFixtures();
 
 function switchTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -936,13 +1223,63 @@ function toggleSetup(btn) {
   if (arrow) arrow.classList.toggle('rotated', !isOpen);
 }
 
-function toggleSection(id, header) {
-  const body  = document.getElementById(id);
-  const arrow = header.querySelector('.collapsible-arrow');
-  if (!body) return;
-  const isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : '';
-  if (arrow) arrow.classList.toggle('rotated', isOpen);
+const TEAM_NAME_MAP = {
+  "Arsenal":"Arsenal","Aston Villa":"Aston Villa","Bournemouth":"Bournemouth",
+  "Brentford":"Brentford","Brighton & Hove Albion":"Brighton","Brighton":"Brighton",
+  "Chelsea":"Chelsea","Coventry City":"Coventry City","Coventry":"Coventry City",
+  "Crystal Palace":"Crystal Palace","Everton":"Everton","Fulham":"Fulham",
+  "Hull City":"Hull City","Hull":"Hull City",
+  "Ipswich Town":"Ipswich Town","Ipswich":"Ipswich Town",
+  "Leeds United":"Leeds United","Leeds":"Leeds United",
+  "Liverpool":"Liverpool","Manchester City":"Manchester City",
+  "Manchester United":"Manchester United",
+  "Newcastle United":"Newcastle United","Newcastle":"Newcastle United",
+  "Nottingham Forest":"Nottingham Forest","Sunderland":"Sunderland",
+  "Tottenham Hotspur":"Tottenham","Tottenham":"Tottenham",
+};
+
+let fixturesData = [];
+
+async function loadFixtures() {
+  const list = document.getElementById('fixture-list');
+  try {
+    const res = await fetch(SERVER + '/api/fixtures');
+    const data = await res.json();
+    if (data.error || !data.fixtures || data.fixtures.length === 0) {
+      list.innerHTML = '<div class="fixture-loading">No upcoming fixtures found.</div>';
+      return;
+    }
+    fixturesData = data.fixtures;
+    renderFixtures();
+  } catch(e) {
+    list.innerHTML = '<div class="fixture-loading">Could not load fixtures.</div>';
+  }
+}
+
+function renderFixtures() {
+  const list = document.getElementById('fixture-list');
+  const currentHome = document.getElementById('hteam').value;
+  const currentAway = document.getElementById('ateam').value;
+  list.innerHTML = fixturesData.map((f, i) => {
+    const home = TEAM_NAME_MAP[f.home] || f.home;
+    const away = TEAM_NAME_MAP[f.away] || f.away;
+    const date = new Date(f.date);
+    const dateStr = date.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+    const isActive = home === currentHome && away === currentAway;
+    return '<button class="fixture-btn ' + (isActive ? 'active' : '') + '" onclick="selectFixture(' + i + ')">' +
+      '<span class="fixture-match">' + home + ' vs ' + away + '</span>' +
+      '<span class="fixture-date">' + dateStr + '</span></button>';
+  }).join('');
+}
+
+function selectFixture(i) {
+  const f = fixturesData[i];
+  const home = TEAM_NAME_MAP[f.home] || f.home;
+  const away = TEAM_NAME_MAP[f.away] || f.away;
+  document.getElementById('hteam').value = home;
+  document.getElementById('ateam').value = away;
+  updateTitle(); run(); renderFixtures();
+  fetchData();
 }
 
 if ('serviceWorker' in navigator) {
@@ -953,7 +1290,5 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
-</body>
-</html>
 </body>
 </html>
