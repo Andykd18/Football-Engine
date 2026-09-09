@@ -693,7 +693,7 @@
     <button class="tab-btn" onclick="switchTab('tab-hist', this)"><i class="ti ti-history" aria-hidden="true"></i>History</button>
     <button class="tab-btn" onclick="switchTab('tab-acca', this)"><i class="ti ti-stack" aria-hidden="true"></i>Acca</button>
     <button class="tab-btn" onclick="switchTab('tab-players', this);loadPlayers()"><i class="ti ti-user" aria-hidden="true"></i>Players</button>
-    <button class="tab-btn" onclick="switchTab('tab-h2h', this)"><i class="ti ti-arrows-left-right" aria-hidden="true"></i>H2H</button>
+    <button class="tab-btn" onclick="switchTab('tab-h2h', this);loadPlayers()"><i class="ti ti-arrows-left-right" aria-hidden="true"></i>H2H</button>
   </div>
 
   <div id="tab-def" class="tab-panel active">
@@ -1411,7 +1411,10 @@ function renderPlayers(data) {
 
 function renderH2H(data) {
   var content = document.getElementById('h2h-content');
-  if (!data) return;
+  if (!data) {
+    content.innerHTML = '<div style="font-size:12px;color:var(--text-3);padding:1rem 0;text-align:center;">Loading player data...</div>';
+    return;
+  }
   var hP = data.home.players || [];
   var aP = data.away.players || [];
   function sum(arr, key) { return arr.reduce(function(s,p){return s+(p[key]||0);},0).toFixed(1); }
