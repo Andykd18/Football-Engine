@@ -528,45 +528,41 @@
   .acca-add-btn:hover { color: var(--text); }
 
   .setup-btn {
-    width: 100%; padding: 10px 14px; font-size: 13px; font-weight: 500;
-    font-family: inherit; cursor: pointer;
-    border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm);
-    background: var(--surface); color: var(--text-2);
-    margin-bottom: 0.75rem; display: flex; align-items: center;
-    justify-content: space-between; transition: all .15s;
+    width:100%;padding:10px 14px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;
+    border:0.5px solid var(--border-mid);border-radius:var(--radius-sm);
+    background:var(--surface);color:var(--text-2);margin-bottom:0.75rem;
+    display:flex;align-items:center;justify-content:space-between;transition:all .15s;
   }
-  .setup-btn:hover { background: var(--surface2); color: var(--text); }
-  .tab-bar { display: flex; gap: 4px; margin-bottom: 1rem; overflow-x: auto; scrollbar-width: none; }
-  .tab-bar::-webkit-scrollbar { display: none; }
-  .tab-btn {
-    flex-shrink: 0; padding: 7px 14px; font-size: 12px; font-weight: 500;
-    font-family: inherit; cursor: pointer;
-    border: 0.5px solid var(--border); border-radius: var(--radius-sm);
-    background: var(--surface); color: var(--text-2);
-    transition: all .15s; white-space: nowrap;
-    display: flex; align-items: center; gap: 6px;
+  .setup-btn:hover{background:var(--surface2);color:var(--text);}
+  .tab-bar{display:flex;gap:4px;margin-bottom:1rem;overflow-x:auto;scrollbar-width:none;}
+  .tab-bar::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    flex-shrink:0;padding:7px 14px;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;
+    border:0.5px solid var(--border);border-radius:var(--radius-sm);
+    background:var(--surface);color:var(--text-2);transition:all .15s;white-space:nowrap;
+    display:flex;align-items:center;gap:6px;
   }
-  .tab-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border-mid); }
-  .tab-btn.active { background: var(--red); color: #fff; border-color: var(--red); }
-  .tab-btn i { font-size: 13px; pointer-events: none; }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-  .fixture-picker { margin-bottom: 1rem; }
-  .fixture-picker-label { font-size: 11px; color: var(--text-3); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .06em; font-weight: 500; }
-  .fixture-list { display: flex; flex-direction: column; gap: 6px; }
-  .fixture-btn {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 14px; background: var(--surface); border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm); cursor: pointer; font-family: inherit;
-    color: var(--text); transition: border-color .15s, background .15s; text-align: left;
+  .tab-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--border-mid);}
+  .tab-btn.active{background:var(--red);color:#fff;border-color:var(--red);}
+  .tab-btn i{font-size:13px;pointer-events:none;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .fixture-picker{margin-bottom:1rem;}
+  .fixture-picker-label{font-size:11px;color:var(--text-3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;font-weight:500;}
+  .fixture-list{display:flex;flex-direction:column;gap:6px;}
+  .fixture-btn{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px;background:var(--surface);border:0.5px solid var(--border);
+    border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;
+    color:var(--text);transition:border-color .15s,background .15s;text-align:left;
   }
-  .fixture-btn:hover { border-color: var(--border-mid); background: var(--surface2); }
-  .fixture-btn.active { border-color: var(--blue-text); background: var(--blue-light); }
-  .fixture-match { font-size: 13px; font-weight: 500; }
-  .fixture-date { font-size: 11px; color: var(--text-3); }
-  .fixture-loading { font-size: 12px; color: var(--text-3); padding: 8px 0; }
-  .collapsible-arrow { font-size: 13px; color: var(--text-3); transition: transform .2s ease; pointer-events: none; }
-  .collapsible-arrow.rotated { transform: rotate(180deg); }
+  .fixture-btn:hover{border-color:var(--border-mid);background:var(--surface2);}
+  .fixture-btn.active{border-color:var(--blue-text);background:var(--blue-light);}
+  .fixture-match{font-size:13px;font-weight:500;}
+  .fixture-date{font-size:11px;color:var(--text-3);}
+  .fixture-loading{font-size:12px;color:var(--text-3);padding:8px 0;}
+  .collapsible-arrow{font-size:13px;color:var(--text-3);transition:transform .2s ease;pointer-events:none;}
+  .collapsible-arrow.rotated{transform:rotate(180deg);}
 </style>
 <body>
 <div class="page">
@@ -592,7 +588,7 @@
   </button>
 
   <div id="pitch-body" style="display:none;overflow:hidden;">
-<div class="pitch">
+  <div class="pitch">
     <div class="team-card home">
       <div class="team-pill">Home</div>
       <select id="hteam" onchange="updateTitle(); run();"></select>
@@ -639,7 +635,7 @@
       <div class="odds-hint" id="aodds-hint">= 1.80</div>
     </div>
   </div>
-<div class="settings">
+  <div class="settings">
     <label>Min edge</label>
     <input type="range" min="1" max="20" step="1" value="5" id="edge-sl">
     <span class="sval" id="edge-v">5%</span>
@@ -655,14 +651,16 @@
     </button>
     <button class="calc-btn" onclick="calculate()">Calculate</button>
   </div>
+  <div class="fetch-status" id="fetch-status"></div>
   </div>
+
   <div class="fetch-status" id="fetch-status">Contacting server...</div>
   <div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:4px;margin-bottom:0.75rem;">
     Had a big win? Share the love with the creator <a href="https://revolut.me/andrewo0n3" target="_blank" style="color:var(--text-3);text-decoration:underline;">here</a> on Revolut
   </div>
 
   <div id="tab-op">
-<div class="section-title">Outcome probabilities</div>
+  <div class="section-title">Outcome probabilities</div>
   <div class="outcomes">
     <div class="oc">
       <div class="oc-bar" id="hbar" style="background:var(--blue);width:0%"></div>
@@ -689,73 +687,77 @@
   </div>
 
   <div class="tab-bar">
-<button class="tab-btn active" onclick="switchTab('tab-def', this)"><i class="ti ti-shield" aria-hidden="true"></i>Defensive &amp; corners</button>
+    <button class="tab-btn active" onclick="switchTab('tab-def', this)"><i class="ti ti-shield" aria-hidden="true"></i>Defensive</button>
+    <button class="tab-btn" onclick="switchTab('tab-cc', this)"><i class="ti ti-rectangle-vertical" aria-hidden="true"></i>Corners &amp; cards</button>
     <button class="tab-btn" onclick="switchTab('tab-sc', this)"><i class="ti ti-grid-dots" aria-hidden="true"></i>Scorelines</button>
     <button class="tab-btn" onclick="switchTab('tab-hist', this)"><i class="ti ti-history" aria-hidden="true"></i>History</button>
     <button class="tab-btn" onclick="switchTab('tab-acca', this)"><i class="ti ti-stack" aria-hidden="true"></i>Acca</button>
+    <button class="tab-btn" onclick="switchTab('tab-players', this);loadPlayers()"><i class="ti ti-user" aria-hidden="true"></i>Players</button>
+    <button class="tab-btn" onclick="switchTab('tab-h2h', this)"><i class="ti ti-arrows-left-right" aria-hidden="true"></i>H2H</button>
   </div>
-
 
   <div id="tab-def" class="tab-panel active">
-<div class="section-title" style="margin-top:1.5rem">Defensive &amp; market stats</div>
-  <div class="outcomes" id="def-stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">
-    <div class="oc">
-      <div class="oc-lbl">BTTS</div>
-      <div class="oc-pct" id="btts-pct">—</div>
-      <div class="oc-imp" id="btts-sub">Both teams to score</div>
-    </div>
-    <div class="oc">
-      <div class="oc-lbl">Over 2.5 goals</div>
-      <div class="oc-pct" id="o25-pct">—</div>
-      <div class="oc-imp" id="o25-sub">Total goals market</div>
-    </div>
-    <div class="oc">
-      <div class="oc-lbl">Under 2.5 goals</div>
-      <div class="oc-pct" id="u25-pct">—</div>
-      <div class="oc-imp" id="u25-sub">Total goals market</div>
-    </div>
+  <div class="section-title" style="margin-top:1.5rem">Defensive &amp; market stats</div>
+  <div class="outcomes" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">
+    <div class="oc"><div class="oc-lbl">BTTS</div><div class="oc-pct" id="btts-pct">&#x2014;</div><div class="oc-imp" id="btts-sub">Both teams to score</div></div>
+    <div class="oc"><div class="oc-lbl">Over 2.5 goals</div><div class="oc-pct" id="o25-pct">&#x2014;</div><div class="oc-imp" id="o25-sub">Total goals market</div></div>
+    <div class="oc"><div class="oc-lbl">Under 2.5 goals</div><div class="oc-pct" id="u25-pct">&#x2014;</div><div class="oc-imp" id="u25-sub">Total goals market</div></div>
   </div>
-  <div class="outcomes" id="cs-stats" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
-    <div class="oc">
-      <div class="oc-bar" id="hcs-bar" style="background:var(--blue);width:0%"></div>
-      <div class="oc-lbl" id="hcs-lbl">Home clean sheet</div>
-      <div class="oc-pct" id="hcs-pct">—</div>
-      <div class="oc-imp" id="hcs-sub">—</div>
-    </div>
-    <div class="oc">
-      <div class="oc-bar" id="acs-bar" style="background:var(--red);width:0%"></div>
-      <div class="oc-lbl" id="acs-lbl">Away clean sheet</div>
-      <div class="oc-pct" id="acs-pct">—</div>
-      <div class="oc-imp" id="acs-sub">—</div>
-    </div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
+    <div class="oc"><div class="oc-bar" id="hcs-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hcs-lbl">Home clean sheet</div><div class="oc-pct" id="hcs-pct">&#x2014;</div><div class="oc-imp" id="hcs-sub">&#x2014;</div></div>
+    <div class="oc"><div class="oc-bar" id="acs-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="acs-lbl">Away clean sheet</div><div class="oc-pct" id="acs-pct">&#x2014;</div><div class="oc-imp" id="acs-sub">&#x2014;</div></div>
   </div>
   </div>
+
+  <div id="tab-cc" class="tab-panel">
+  <div class="section-title" style="margin-top:1.5rem">Corners &amp; cards</div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
+    <div class="oc"><div class="oc-bar" id="hc-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hc-lbl">Home corners</div><div class="oc-pct" id="hc-avg">&#x2014;</div><div class="oc-imp" id="hc-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-bar" id="ac-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="ac-lbl">Away corners</div><div class="oc-pct" id="ac-avg">&#x2014;</div><div class="oc-imp" id="ac-sub">Avg per match</div></div>
+  </div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
+    <div class="oc"><div class="oc-lbl" id="hy-lbl">Home yellow cards</div><div class="oc-pct" id="hy-avg">&#x2014;</div><div class="oc-imp" id="hy-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-lbl" id="ay-lbl">Away yellow cards</div><div class="oc-pct" id="ay-avg">&#x2014;</div><div class="oc-imp" id="ay-sub">Avg per match</div></div>
+  </div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
+    <div class="oc"><div class="oc-lbl" id="hr-lbl">Home red cards</div><div class="oc-pct" id="hr-avg">&#x2014;</div><div class="oc-imp" id="hr-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-lbl" id="ar-lbl">Away red cards</div><div class="oc-pct" id="ar-avg">&#x2014;</div><div class="oc-imp" id="ar-sub">Avg per match</div></div>
+  </div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
+    <div class="oc"><div class="oc-bar" id="hs-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hs-lbl">Home total shots</div><div class="oc-pct" id="hs-avg">&#x2014;</div><div class="oc-imp" id="hs-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-bar" id="as-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="as-lbl">Away total shots</div><div class="oc-pct" id="as-avg">&#x2014;</div><div class="oc-imp" id="as-sub">Avg per match</div></div>
+  </div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
+    <div class="oc"><div class="oc-lbl" id="hf-lbl">Home fouls</div><div class="oc-pct" id="hf-avg">&#x2014;</div><div class="oc-imp" id="hf-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-lbl" id="af-lbl">Away fouls</div><div class="oc-pct" id="af-avg">&#x2014;</div><div class="oc-imp" id="af-sub">Avg per match</div></div>
+  </div>
+  </div>
+
   <div id="tab-sc" class="tab-panel">
-<div class="section-title">Most likely scorelines</div>
+  <div class="section-title">Most likely scorelines</div>
   <div class="scorelines" id="bars"></div>
 
   <div class="section-title">
     Scoreline matrix
-    <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3)">— home (rows) · away (cols)</span>
+    <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-3)">&#x2014; home (rows) &middot; away (cols)</span>
   </div>
   <div id="matrix"></div>
   <div class="matrix-legend" id="legend"></div>
-
-  <!-- History -->
   </div>
+
   <div id="tab-hist" class="tab-panel">
-<div class="history-wrap" id="history-wrap">
+  <div class="history-wrap" id="history-wrap">
     <div class="history-header">
       <div class="section-title" style="margin-bottom:0">Search history</div>
       <button class="clear-btn" onclick="clearHistory()">Clear all</button>
     </div>
-    <div id="history-list"><div class="history-empty">No searches yet — run a calculation to save it here.</div></div>
+    <button class="export-btn" onclick="exportCSV()">&#x2B07; Export to CSV</button>
+    <div id="history-list"><div class="history-empty">No searches yet &#x2014; run a calculation to save it here.</div></div>
+  </div>
   </div>
 
-  <!-- Acca builder -->
-  </div>
   <div id="tab-acca" class="tab-panel">
-<div class="acca-wrap" id="acca-wrap">
+  <div class="acca-wrap" id="acca-wrap">
     <div class="acca-header">
       <h3>Acca builder</h3>
       <span class="acca-meta" id="acca-meta">0 legs</span>
@@ -764,16 +766,29 @@
     <div class="acca-result">
       <div>
         <div class="acca-meta">Combined odds</div>
-        <div class="acca-total-odds" id="acca-total">—</div>
+        <div class="acca-total-odds" id="acca-total">&#x2014;</div>
       </div>
       <div>
         <div class="acca-meta" style="margin-bottom:4px">Implied prob</div>
-        <div style="font-size:13px;font-weight:500" id="acca-prob">—</div>
+        <div style="font-size:13px;font-weight:500" id="acca-prob">&#x2014;</div>
       </div>
     </div>
   </div>
 
 </div>
+  </div>
+
+  <div id="tab-players" class="tab-panel">
+    <div id="players-status" style="font-size:11px;color:var(--text-3);text-align:center;margin:0.75rem 0;min-height:16px;"></div>
+    <div id="players-content">
+      <div style="font-size:12px;color:var(--text-3);padding:1rem 0;text-align:center;">Select a fixture and click the Players tab to load squad stats</div>
+    </div>
+  </div>
+
+  <div id="tab-h2h" class="tab-panel">
+    <div id="h2h-content">
+      <div style="font-size:12px;color:var(--text-3);padding:1rem 0;text-align:center;">Load player stats first by clicking the Players tab</div>
+    </div>
   </div>
 
 </div>
@@ -1234,17 +1249,16 @@ renderHistory();
 renderAcca();
 
 function switchTab(id, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
 }
 
-
 function toggleSetup(btn) {
-  const body  = document.getElementById('pitch-body');
-  const arrow = btn.querySelector('.collapsible-arrow');
-  const isOpen = body.style.display !== 'none';
+  var body  = document.getElementById('pitch-body');
+  var arrow = btn.querySelector('.collapsible-arrow');
+  var isOpen = body.style.display !== 'none';
   body.style.display = isOpen ? 'none' : '';
   if (arrow) arrow.classList.toggle('rotated', !isOpen);
 }
@@ -1267,10 +1281,10 @@ const TEAM_NAME_MAP = {
 let fixturesData = [];
 
 async function loadFixtures() {
-  const list = document.getElementById('fixture-list');
+  var list = document.getElementById('fixture-list');
   try {
-    const res = await fetch(SERVER + '/api/fixtures');
-    const data = await res.json();
+    var res  = await fetch(SERVER + '/api/fixtures');
+    var data = await res.json();
     if (data.error || !data.fixtures || data.fixtures.length === 0) {
       list.innerHTML = '<div class="fixture-loading">No upcoming fixtures found.</div>';
       return;
@@ -1283,9 +1297,9 @@ async function loadFixtures() {
 }
 
 function renderFixtures() {
-  const list = document.getElementById('fixture-list');
-  const currentHome = document.getElementById('hteam').value;
-  const currentAway = document.getElementById('ateam').value;
+  var list = document.getElementById('fixture-list');
+  var currentHome = document.getElementById('hteam').value;
+  var currentAway = document.getElementById('ateam').value;
   list.innerHTML = fixturesData.map(function(f, i) {
     var home = TEAM_NAME_MAP[f.home] || f.home;
     var away = TEAM_NAME_MAP[f.away] || f.away;
@@ -1304,8 +1318,112 @@ function selectFixture(i) {
   var away = TEAM_NAME_MAP[f.away] || f.away;
   document.getElementById('hteam').value = home;
   document.getElementById('ateam').value = away;
-  updateTitle(); run(); renderFixtures();
-  fetchData();
+  playersData = null;
+  updateTitle(); renderFixtures(); fetchData();
+}
+
+let playersData = null;
+
+async function loadPlayers() {
+  var home = document.getElementById('hteam').value;
+  var away = document.getElementById('ateam').value;
+  var status = document.getElementById('players-status');
+  var content = document.getElementById('players-content');
+  if (playersData && playersData._home === home && playersData._away === away) return;
+  status.textContent = 'Loading squad stats...';
+  status.style.color = 'var(--text-3)';
+  content.innerHTML = '';
+  try {
+    var res  = await fetch(SERVER + '/api/players?home=' + encodeURIComponent(home) + '&away=' + encodeURIComponent(away));
+    var data = await res.json();
+    if (data.error) {
+      status.textContent = 'Error: ' + data.error;
+      status.style.color = 'var(--red-text)';
+      return;
+    }
+    playersData = data;
+    playersData._home = home;
+    playersData._away = away;
+    status.textContent = 'Squad stats loaded';
+    status.style.color = 'var(--green-text)';
+    renderPlayers(data);
+    renderH2H(data);
+  } catch(e) {
+    status.textContent = 'Could not load player stats';
+    status.style.color = 'var(--red-text)';
+  }
+}
+
+function renderPlayers(data) {
+  var content = document.getElementById('players-content');
+  function playerTable(team, players) {
+    if (!players || players.length === 0) return '<div style="color:var(--text-3);font-size:12px;padding:1rem 0;">No player data available</div>';
+    return '<div style="font-size:12px;font-weight:500;color:var(--text-2);margin:1rem 0 0.5rem;">' + team + '</div>' +
+    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;">' +
+    '<thead><tr>' +
+    '<th style="text-align:left;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">Player</th>' +
+    '<th style="text-align:left;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">Pos</th>' +
+    '<th style="text-align:right;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">Scorer%</th>' +
+    '<th style="text-align:right;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">Yellow%</th>' +
+    '<th style="text-align:right;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">SoT/90</th>' +
+    '<th style="text-align:right;padding:6px 8px;color:var(--text-3);border-bottom:0.5px solid var(--border-mid);">Ast/90</th>' +
+    '</tr></thead><tbody>' +
+    players.slice(0,15).map(function(p) {
+      var sc = p.goalscorer_prob >= 30 ? 'color:var(--green-text)' : p.goalscorer_prob >= 15 ? 'color:var(--text)' : 'color:var(--text-2)';
+      var yc = p.yellow_prob >= 30 ? 'color:var(--red-text)' : 'color:var(--text-2)';
+      return '<tr style="border-bottom:0.5px solid var(--border)">' +
+        '<td style="padding:7px 8px;color:var(--text);font-weight:500">' + p.name + '</td>' +
+        '<td style="padding:7px 8px;color:var(--text-3)">' + (p.position||'—') + '</td>' +
+        '<td style="padding:7px 8px;text-align:right;' + sc + '">' + p.goalscorer_prob + '%</td>' +
+        '<td style="padding:7px 8px;text-align:right;' + yc + '">' + p.yellow_prob + '%</td>' +
+        '<td style="padding:7px 8px;text-align:right;color:var(--text-2)">' + p.shots_on_p90.toFixed(2) + '</td>' +
+        '<td style="padding:7px 8px;text-align:right;color:var(--text-2)">' + p.assists_p90.toFixed(2) + '</td>' +
+      '</tr>';
+    }).join('') + '</tbody></table></div>';
+  }
+  content.innerHTML = playerTable(data.home.team, data.home.players) + playerTable(data.away.team, data.away.players);
+}
+
+function renderH2H(data) {
+  var content = document.getElementById('h2h-content');
+  if (!data) return;
+  var hP = data.home.players || [];
+  var aP = data.away.players || [];
+  function sum(arr, key) { return arr.reduce(function(s,p){return s+(p[key]||0);},0).toFixed(1); }
+  function sumF(arr, key) { return arr.reduce(function(s,p){return s+(p[key]||0);},0).toFixed(2); }
+  function top1(players, key) { return players.slice().sort(function(a,b){return b[key]-a[key];})[0]; }
+  function row(label, hv, av, higher) {
+    var hw = higher ? parseFloat(hv)>=parseFloat(av) : parseFloat(hv)<=parseFloat(av);
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
+      '<div style="font-size:13px;' + (hw?'color:var(--green-text);font-weight:500':'color:var(--text-2)') + '">' + hv + '</div>' +
+      '<div style="font-size:11px;color:var(--text-3);text-align:center">' + label + '</div>' +
+      '<div style="font-size:13px;' + (!hw?'color:var(--green-text);font-weight:500':'color:var(--text-2)') + '">' + av + '</div>' +
+    '</div>';
+  }
+  function spotlight(player, team, label) {
+    if (!player) return '';
+    return '<div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;">' +
+      '<div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">' + label + ' · ' + team + '</div>' +
+      '<div style="font-size:13px;font-weight:500;color:var(--text)">' + player.name + '</div>' +
+    '</div>';
+  }
+  var hn = data.home.team, an = data.away.team;
+  content.innerHTML =
+    '<div style="display:flex;justify-content:space-between;padding:8px 0;margin-bottom:0.75rem;border-bottom:0.5px solid var(--border-mid)">' +
+      '<div style="font-size:13px;font-weight:500;color:var(--blue-text)">' + hn + '</div>' +
+      '<div style="font-size:11px;color:var(--text-3)">H2H</div>' +
+      '<div style="font-size:13px;font-weight:500;color:var(--red-text)">' + an + '</div>' +
+    '</div>' +
+    row('Total goalscorer %', sum(hP,'goalscorer_prob')+'%', sum(aP,'goalscorer_prob')+'%', true) +
+    row('Yellow card risk %', sum(hP,'yellow_prob')+'%', sum(aP,'yellow_prob')+'%', false) +
+    row('Shots on target / 90', sumF(hP,'shots_on_p90'), sumF(aP,'shots_on_p90'), true) +
+    row('Assists / 90', sumF(hP,'assists_p90'), sumF(aP,'assists_p90'), true) +
+    '<div style="margin-top:1rem">' +
+    spotlight(top1(hP,'goalscorer_prob'), hn, 'Most likely scorer') +
+    spotlight(top1(aP,'goalscorer_prob'), an, 'Most likely scorer') +
+    spotlight(top1(hP,'yellow_prob'), hn, 'Highest card risk') +
+    spotlight(top1(aP,'yellow_prob'), an, 'Highest card risk') +
+    '</div>';
 }
 
 loadFixtures();
@@ -1313,8 +1431,8 @@ loadFixtures();
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('/Football-Engine/sw.js')
-      .then(function(reg) { console.log('SW registered'); })
-      .catch(function(err) { console.log('SW failed:', err); });
+      .then(function(){console.log('SW registered');})
+      .catch(function(e){console.log('SW failed:',e);});
   });
 }
 </script>
