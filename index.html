@@ -1206,7 +1206,6 @@ updateHint('aodds', 'aodds-hint');
 renderHistory();
 renderAcca();
 run();
-loadFixtures();
 
 function switchTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -1281,6 +1280,7 @@ function selectFixture(i) {
   updateTitle(); run(); renderFixtures();
   fetchData();
 }
+loadFixtures();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
