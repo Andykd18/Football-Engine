@@ -27,8 +27,7 @@ APIFOOTBALL_TEAM_IDS = {
     "Brentford":          55,
     "Brighton":           51,
     "Chelsea":            49,
-  "Coventry City":      1346,
-"Coventry":           1346,
+    "Coventry City":      369,
     "Crystal Palace":     52,
     "Everton":            45,
     "Fulham":             36,
@@ -52,7 +51,6 @@ ODDS_TEAM_MAP = {
     "Brighton":           "Brighton and Hove Albion",
     "Chelsea":            "Chelsea",
     "Coventry City":      "Coventry City",
-"Coventry":           "Coventry City",
     "Crystal Palace":     "Crystal Palace",
     "Everton":            "Everton",
     "Fulham":             "Fulham",
@@ -504,6 +502,120 @@ def api_match():
 
     return jsonify(result)
 
+
+
+@app.route("/api/players")
+def api_players():
+    """
+    Fetch squad and season stats for both teams.
+    Returns player-level goals, assists, yellow cards, shots on target per 90.
+    """
+    home = request.args.get("home", "")
+    away = request.args.get("away", "")
+
+    if not home or not away:
+        return jsonify({"error": "Provide home and away team names"}), 400
+
+    home_id = APIFOOTBALL_TEAM_IDS.get(home)
+    away_id = APIFOOTBALL_TEAM_IDS.get(away)
+
+    if not home_id or not away_id:
+        return jsonify({"error": f"Team IDs not found for {home} or {away}"}), 400
+
+    def get_squad_stats(team_id, team_name):
+        # Get squad
+        squad_resp = requests.get(
+            f"{APIFOOTBALL_BASE}/players/squads",
+            headers=_headers(),
+            params={"team": team_id},
+            timeout=15
+        )
+        squad_resp.raise_for_status()
+        squad_data = squad_resp.json().get("response", [])
+        if not squad_data:
+            return []
+
+        players_raw = squad_data[0].get("players", [])
+
+        # Get player stats for season
+        stats_resp = requests.get(
+            f"{APIFOOTBALL_BASE}/players",
+            headers=_headers(),
+            params={"team": team_id, "season": SEASON, "league": EPL_LEAGUE_ID},
+            timeout=15
+        )
+        stats_resp.raise_for_status()
+        stats_data = stats_resp.json().get("response", [])
+
+        # Build lookup by player id
+        stats_map = {}
+        for entry in stats_data:
+            pid = entry.get("player", {}).get("id")
+            s = entry.get("statistics", [{}])[0]
+            minutes = s.get("games", {}).get("minutes") or 0
+            if minutes < 45:
+                continue
+            per90 = minutes / 90
+            goals       = s.get("goals", {}).get("total") or 0
+            assists     = s.get("goals", {}).get("assists") or 0
+            yellows     = s.get("cards", {}).get("yellow") or 0
+            shots_total = s.get("shots", {}).get("total") or 0
+            shots_on    = s.get("shots", {}).get("on") or 0
+            position    = s.get("games", {}).get("position", "")
+            stats_map[pid] = {
+                "minutes":      minutes,
+                "per90":        round(per90, 2),
+                "goals_p90":    round(goals / per90, 3) if per90 > 0 else 0,
+                "assists_p90":  round(assists / per90, 3) if per90 > 0 else 0,
+                "yellows_p90":  round(yellows / per90, 3) if per90 > 0 else 0,
+                "shots_p90":    round(shots_total / per90, 3) if per90 > 0 else 0,
+                "shots_on_p90": round(shots_on / per90, 3) if per90 > 0 else 0,
+                "position":     position,
+            }
+
+        # Merge squad with stats
+        result = []
+        for p in players_raw:
+            pid  = p.get("id")
+            name = p.get("name", "")
+            pos  = p.get("position", "")
+            s    = stats_map.get(pid, {})
+            if not s:
+                continue
+
+            # Anytime goalscorer probability using Poisson
+            # P(at least 1 goal) = 1 - e^(-lambda)
+            import math
+            lam = s.get("goals_p90", 0)
+            goalscorer_prob = round((1 - math.exp(-lam)) * 100, 1) if lam > 0 else 0
+            yellow_prob     = round((1 - math.exp(-s.get("yellows_p90", 0))) * 100, 1)
+
+            result.append({
+                "id":               pid,
+                "name":             name,
+                "position":         pos or s.get("position", ""),
+                "minutes":          s.get("minutes", 0),
+                "goals_p90":        s.get("goals_p90", 0),
+                "assists_p90":      s.get("assists_p90", 0),
+                "yellows_p90":      s.get("yellows_p90", 0),
+                "shots_on_p90":     s.get("shots_on_p90", 0),
+                "goalscorer_prob":  goalscorer_prob,
+                "yellow_prob":      yellow_prob,
+            })
+
+        # Sort by goalscorer probability
+        result.sort(key=lambda x: x["goalscorer_prob"], reverse=True)
+        return result
+
+    try:
+        home_players = get_squad_stats(home_id, home)
+        away_players = get_squad_stats(away_id, away)
+        return jsonify({
+            "home": {"team": home, "players": home_players},
+            "away": {"team": away, "players": away_players},
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     print("\n  Pricing Engine server starting...\n")
