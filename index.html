@@ -1292,6 +1292,16 @@ async function loadFixtures() {
     }
     fixturesData = data.fixtures;
     renderFixtures();
+    // Auto-select first upcoming fixture
+    if (fixturesData.length > 0) {
+      var f = fixturesData[0];
+      var home = TEAM_NAME_MAP[f.home] || f.home;
+      var away = TEAM_NAME_MAP[f.away] || f.away;
+      document.getElementById('hteam').value = home;
+      document.getElementById('ateam').value = away;
+      updateTitle();
+      renderFixtures();
+    }
   } catch(e) {
     list.innerHTML = '<div class="fixture-loading">Could not load fixtures.</div>';
   }
