@@ -1429,15 +1429,23 @@ function renderH2H(data) {
       '<div style="font-size:11px;color:var(--text-3)">H2H</div>' +
       '<div style="font-size:13px;font-weight:500;color:var(--red-text)">' + an + '</div>' +
     '</div>' +
-    row('Total goalscorer %', sum(hP,'goalscorer_prob')+'%', sum(aP,'goalscorer_prob')+'%', true) +
-    row('Yellow card risk %', sum(hP,'yellow_prob')+'%', sum(aP,'yellow_prob')+'%', false) +
-    row('Shots on target / 90', sumF(hP,'shots_on_p90'), sumF(aP,'shots_on_p90'), true) +
+    row('Goals / 90', sumF(hP,'goals_p90'), sumF(aP,'goals_p90'), true) +
     row('Assists / 90', sumF(hP,'assists_p90'), sumF(aP,'assists_p90'), true) +
+    row('Shots / 90', sumF(hP,'shots_p90'), sumF(aP,'shots_p90'), true) +
+    row('Shots on target / 90', sumF(hP,'shots_on_p90'), sumF(aP,'shots_on_p90'), true) +
+    row('Fouls committed / 90', sumF(hP,'fouls_p90'), sumF(aP,'fouls_p90'), false) +
+    row('Fouls drawn / 90', sumF(hP,'fouled_p90'), sumF(aP,'fouled_p90'), true) +
+    row('Tackles / 90', sumF(hP,'tackles_p90'), sumF(aP,'tackles_p90'), true) +
+    row('Goalscorer probability', sum(hP,'goalscorer_prob')+'%', sum(aP,'goalscorer_prob')+'%', true) +
+    row('Yellow card risk', sum(hP,'yellow_prob')+'%', sum(aP,'yellow_prob')+'%', false) +
     '<div style="margin-top:1rem">' +
+    '<div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Spotlight</div>' +
     spotlight(top1(hP,'goalscorer_prob'), hn, 'Most likely scorer') +
     spotlight(top1(aP,'goalscorer_prob'), an, 'Most likely scorer') +
     spotlight(top1(hP,'yellow_prob'), hn, 'Highest card risk') +
     spotlight(top1(aP,'yellow_prob'), an, 'Highest card risk') +
+    spotlight(top1(hP.filter(function(p){return p.position==="Goalkeeper";}), 'saves_p90'), hn, 'Keeper saves/90') +
+    spotlight(top1(aP.filter(function(p){return p.position==="Goalkeeper";}), 'saves_p90'), an, 'Keeper saves/90') +
     '</div>';
 }
 
