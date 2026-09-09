@@ -881,6 +881,7 @@ async function fetchData() {
     status.textContent = msgs.join(' · ');
     fetchComplete = true;
     calculate();
+    document.getElementById('fetch-status').textContent = '';
 
   } catch (e) {
     status.className = 'fetch-status err';
@@ -1489,8 +1490,7 @@ function renderH2H(data) {
     spotlight(top1(aP,'goalscorer_prob'), an, 'Most likely scorer') +
     spotlight(top1(hP,'yellow_prob'), hn, 'Highest card risk') +
     spotlight(top1(aP,'yellow_prob'), an, 'Highest card risk') +
-    spotlight(top1(hP.filter(function(p){return p.position==="Goalkeeper";}), 'saves_p90'), hn, 'Keeper saves/90') +
-    spotlight(top1(aP.filter(function(p){return p.position==="Goalkeeper";}), 'saves_p90'), an, 'Keeper saves/90') +
+
     '</div>';
 }
 
