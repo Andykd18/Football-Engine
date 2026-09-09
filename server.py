@@ -561,16 +561,24 @@ def api_players():
             yellows     = s.get("cards", {}).get("yellow") or 0
             shots_total = s.get("shots", {}).get("total") or 0
             shots_on    = s.get("shots", {}).get("on") or 0
+            fouls_comm  = s.get("fouls", {}).get("committed") or 0
+            fouls_drawn = s.get("fouls", {}).get("drawn") or 0
+            tackles     = s.get("tackles", {}).get("total") or 0
+            saves       = s.get("goals", {}).get("saves") or 0
             position    = s.get("games", {}).get("position", "")
             stats_map[pid] = {
-                "minutes":      minutes,
-                "per90":        round(per90, 2),
-                "goals_p90":    round(goals / per90, 3) if per90 > 0 else 0,
-                "assists_p90":  round(assists / per90, 3) if per90 > 0 else 0,
-                "yellows_p90":  round(yellows / per90, 3) if per90 > 0 else 0,
-                "shots_p90":    round(shots_total / per90, 3) if per90 > 0 else 0,
-                "shots_on_p90": round(shots_on / per90, 3) if per90 > 0 else 0,
-                "position":     position,
+                "minutes":       minutes,
+                "per90":         round(per90, 2),
+                "goals_p90":     round(goals / per90, 3) if per90 > 0 else 0,
+                "assists_p90":   round(assists / per90, 3) if per90 > 0 else 0,
+                "yellows_p90":   round(yellows / per90, 3) if per90 > 0 else 0,
+                "shots_p90":     round(shots_total / per90, 3) if per90 > 0 else 0,
+                "shots_on_p90":  round(shots_on / per90, 3) if per90 > 0 else 0,
+                "fouls_p90":     round(fouls_comm / per90, 3) if per90 > 0 else 0,
+                "fouled_p90":    round(fouls_drawn / per90, 3) if per90 > 0 else 0,
+                "tackles_p90":   round(tackles / per90, 3) if per90 > 0 else 0,
+                "saves_p90":     round(saves / per90, 3) if per90 > 0 else 0,
+                "position":      position,
             }
 
         # Merge squad with stats
@@ -598,7 +606,12 @@ def api_players():
                 "goals_p90":        s.get("goals_p90", 0),
                 "assists_p90":      s.get("assists_p90", 0),
                 "yellows_p90":      s.get("yellows_p90", 0),
+                "shots_p90":        s.get("shots_p90", 0),
                 "shots_on_p90":     s.get("shots_on_p90", 0),
+                "fouls_p90":        s.get("fouls_p90", 0),
+                "fouled_p90":       s.get("fouled_p90", 0),
+                "tackles_p90":      s.get("tackles_p90", 0),
+                "saves_p90":        s.get("saves_p90", 0),
                 "goalscorer_prob":  goalscorer_prob,
                 "yellow_prob":      yellow_prob,
             })
