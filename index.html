@@ -610,6 +610,11 @@
     </div>
   </div>
 
+  <div class="pitch-header" onclick="toggleSection('pitch-body', this)">
+    <span class="pitch-header-title">Match setup</span>
+    <span class="collapsible-arrow open">&#x25BC;</span>
+  </div>
+  <div id="pitch-body" class="collapsible-body open" style="max-height:1000px">
   <div class="pitch">
     <div class="team-card home">
       <div class="team-pill">Home</div>
@@ -658,6 +663,8 @@
     </div>
   </div>
 
+  </div><!-- end pitch-body -->
+
   <div class="settings">
     <label>Min edge</label>
     <input type="range" min="1" max="20" step="1" value="5" id="edge-sl">
@@ -679,7 +686,11 @@
     Had a big win? Share the love with the creator <a href="https://revolut.me/andrewo0n3" target="_blank" style="color:var(--text-3);text-decoration:underline;">here</a> on Revolut
   </div>
 
-  <div class="section-title">Outcome probabilities</div>
+  <div class="collapsible-header" onclick="toggleSection('op-body', this)">
+    <span class="collapsible-title">Outcome probabilities</span>
+    <span class="collapsible-arrow open">&#x25BC;</span>
+  </div>
+  <div id="op-body" class="collapsible-body open" style="max-height:500px">
   <div class="outcomes">
     <div class="oc">
       <div class="oc-bar" id="hbar" style="background:var(--blue);width:0%"></div>
@@ -704,7 +715,13 @@
     </div>
   </div>
 
-  <div class="section-title" style="margin-top:1.5rem">Defensive &amp; market stats</div>
+  </div><!-- end op-body -->
+
+  <div class="collapsible-header" onclick="toggleSection('def-body', this)">
+    <span class="collapsible-title">Defensive &amp; market stats</span>
+    <span class="collapsible-arrow open">&#x25BC;</span>
+  </div>
+  <div id="def-body" class="collapsible-body open" style="max-height:800px">
   <div class="outcomes" id="def-stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">
     <div class="oc">
       <div class="oc-lbl">BTTS</div>
@@ -737,7 +754,13 @@
     </div>
   </div>
 
-  <div class="section-title" style="margin-top:1.5rem">Corners &amp; cards</div>
+  </div><!-- end def-body -->
+
+  <div class="collapsible-header" onclick="toggleSection('cc-body', this)">
+    <span class="collapsible-title">Corners &amp; cards</span>
+    <span class="collapsible-arrow open">&#x25BC;</span>
+  </div>
+  <div id="cc-body" class="collapsible-body open" style="max-height:1200px">
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
     <div class="oc">
       <div class="oc-bar" id="hc-bar" style="background:var(--blue);width:0%"></div>
@@ -804,7 +827,14 @@
   </div>
 
 
-  <div class="section-title">Most likely scorelines</div>
+  </div><!-- end cc-body -->
+
+  <div class="collapsible-header" onclick="toggleSection('scores-body', this)">
+    <span class="collapsible-title">Most likely scorelines &amp; matrix</span>
+    <span class="collapsible-arrow open">&#x25BC;</span>
+  </div>
+  <div id="scores-body" class="collapsible-body open" style="max-height:2000px">
+  <div style="height:10px"></div>
   <div class="scorelines" id="bars"></div>
 
   <div class="section-title">
@@ -815,7 +845,14 @@
   <div class="matrix-legend" id="legend"></div>
 
   <!-- History -->
-  <div class="history-wrap" id="history-wrap">
+  </div><!-- end scores-body -->
+
+  <div class="collapsible-header" onclick="toggleSection('hist-body', this)">
+    <span class="collapsible-title">Search history</span>
+    <span class="collapsible-arrow open">&#x25BC;</span>
+  </div>
+  <div id="hist-body" class="collapsible-body open" style="max-height:3000px">
+  <div class="history-wrap" id="history-wrap" style="border-top:none;padding-top:0.5rem">
     <div class="history-header">
       <div class="section-title" style="margin-bottom:0">Search history</div>
       <button class="clear-btn" onclick="clearHistory()">Clear all</button>
@@ -825,7 +862,14 @@
   </div>
 
   <!-- Acca builder -->
-  <div class="acca-wrap" id="acca-wrap">
+  </div><!-- end hist-body -->
+
+  <div class="collapsible-header" onclick="toggleSection('acca-body', this)">
+    <span class="collapsible-title">Acca builder</span>
+    <span class="collapsible-arrow open">&#x25BC;</span>
+  </div>
+  <div id="acca-body" class="collapsible-body open" style="max-height:2000px">
+  <div class="acca-wrap" id="acca-wrap" style="margin-top:0">
     <div class="acca-header">
       <h3>Acca builder</h3>
       <span class="acca-meta" id="acca-meta">0 legs</span>
@@ -843,6 +887,7 @@
     </div>
   </div>
 
+  </div><!-- end acca-body -->
 </div>
 <script>
 const TEAMS = [
@@ -854,6 +899,25 @@ const TEAMS = [
 ].sort();
 
 const $ = id => document.getElementById(id);
+
+function toggleSection(id, header) {
+  const body  = document.getElementById(id);
+  const arrow = header.querySelector('.collapsible-arrow');
+  if (!body) return;
+  if (body.classList.contains('closed')) {
+    body.classList.remove('closed');
+    body.classList.add('open');
+    body.style.maxHeight = body.scrollHeight + 'px';
+    if (arrow) arrow.classList.add('open');
+  } else {
+    body.style.maxHeight = body.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      body.classList.add('closed');
+      body.classList.remove('open');
+      if (arrow) arrow.classList.remove('open');
+    });
+  }
+}
 
 function buildDropdowns() {
   ['hteam','ateam'].forEach((id, i) => {
