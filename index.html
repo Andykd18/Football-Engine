@@ -879,6 +879,7 @@ async function fetchData() {
     const allOk = msgs.every(m => !m.toLowerCase().includes('error') && !m.toLowerCase().includes('not found'));
     status.className = 'fetch-status ' + (allOk ? 'ok' : 'err');
     status.textContent = msgs.join(' · ');
+    fetchComplete = true;
     calculate();
 
   } catch (e) {
@@ -1088,7 +1089,7 @@ function run() {
     <div class="leg-item"><div class="leg-dot" style="background:#A32D2D"></div>${aName} win</div>`;
 
   // Store result so calculate() can save it to history
-  window._lastResult = { hName, aName, hw, dr, aw, himp, dimp, aimp, minEdge };
+  window._lastResult = { hName, aName, hw, dr, aw, himp, dimp, aimp, minEdge, homeLambda: hl, awayLambda: al };
 }
 
 function calculate() {
@@ -1330,10 +1331,12 @@ function selectFixture(i) {
   document.getElementById('hteam').value = home;
   document.getElementById('ateam').value = away;
   playersData = null;
+  fetchComplete = false;
   updateTitle(); renderFixtures(); fetchData();
 }
 
 let playersData = null;
+let fetchComplete = false;
 
 async function loadPlayers() {
   var home = document.getElementById('hteam').value;
@@ -1368,20 +1371,38 @@ async function loadPlayers() {
 function renderPlayers(data) {
   var content = document.getElementById('players-content');
 
-  function playerCard(team, players, accentColor) {
+  // Get clean sheet probs from main fetch xGA values
+  var hCS = window._lastResult ? Math.exp(-(window._lastResult.awayLambda || 1.2)) : null;
+  var aCS = window._lastResult ? Math.exp(-(window._lastResult.homeLambda || 1.2)) : null;
+
+  function playerCard(team, players, accentColor, csPct) {
     if (!players || players.length === 0) {
       return '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid '+accentColor+'">'+team+'</div>' +
         '<div style="font-size:11px;color:var(--text-3);">No data available</div></div>';
     }
     var rows = players.slice(0,12).map(function(p) {
+      var isGK = p.position === 'Goalkeeper';
       var sc = p.goalscorer_prob >= 30 ? 'var(--green-text)' : p.goalscorer_prob >= 15 ? 'var(--text)' : 'var(--text-3)';
       var yc = p.yellow_prob >= 30 ? 'var(--red-text)' : 'var(--text-3)';
-      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border)">' +
-        '<div style="min-width:0;flex:1;overflow:hidden">' +
-          '<div style="font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + p.name + '</div>' +
-          '<div style="font-size:10px;color:var(--text-3)">' + (p.position||'') + '</div>' +
-        '</div>' +
-        '<div style="display:flex;gap:8px;flex-shrink:0;margin-left:8px">' +
+      var statCols;
+      if (isGK) {
+        var csPctVal = csPct != null ? (csPct * 100).toFixed(1) + '%' : '—';
+        var csCol = csPct != null && csPct > 0.3 ? 'var(--green-text)' : 'var(--text-2)';
+        statCols =
+          '<div style="text-align:center;min-width:44px">' +
+            '<div style="font-size:12px;font-weight:500;color:'+csCol+'">' + csPctVal + '</div>' +
+            '<div style="font-size:9px;color:var(--text-3)">clean sh.</div>' +
+          '</div>' +
+          '<div style="text-align:center;min-width:32px">' +
+            '<div style="font-size:12px;font-weight:500;color:'+yc+'">' + p.yellow_prob + '%</div>' +
+            '<div style="font-size:9px;color:var(--text-3)">card</div>' +
+          '</div>' +
+          '<div style="text-align:center;min-width:28px">' +
+            '<div style="font-size:12px;color:var(--text-2)">' + p.saves_p90.toFixed(1) + '</div>' +
+            '<div style="font-size:9px;color:var(--text-3)">saves</div>' +
+          '</div>';
+      } else {
+        statCols =
           '<div style="text-align:center;min-width:36px">' +
             '<div style="font-size:12px;font-weight:500;color:'+sc+'">' + p.goalscorer_prob + '%</div>' +
             '<div style="font-size:9px;color:var(--text-3)">scorer</div>' +
@@ -1393,8 +1414,14 @@ function renderPlayers(data) {
           '<div style="text-align:center;min-width:28px">' +
             '<div style="font-size:12px;color:var(--text-2)">' + p.shots_on_p90.toFixed(1) + '</div>' +
             '<div style="font-size:9px;color:var(--text-3)">SoT</div>' +
-          '</div>' +
+          '</div>';
+      }
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border)">' +
+        '<div style="min-width:0;flex:1;overflow:hidden">' +
+          '<div style="font-size:12px;font-weight:500;color:' + (isGK ? 'var(--gold-text,#d4b84a)' : 'var(--text)') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + p.name + '</div>' +
+          '<div style="font-size:10px;color:var(--text-3)">' + (p.position||'') + '</div>' +
         '</div>' +
+        '<div style="display:flex;gap:8px;flex-shrink:0;margin-left:8px">' + statCols + '</div>' +
       '</div>';
     }).join('');
     return '<div style="flex:1;min-width:0">' +
@@ -1404,8 +1431,8 @@ function renderPlayers(data) {
   }
 
   content.innerHTML = '<div style="display:flex;gap:16px;align-items:flex-start">' +
-    playerCard(data.home.team, data.home.players, 'var(--blue)') +
-    playerCard(data.away.team, data.away.players, 'var(--red)') +
+    playerCard(data.home.team, data.home.players, 'var(--blue)', hCS) +
+    playerCard(data.away.team, data.away.players, 'var(--red)', aCS) +
   '</div>';
 }
 
@@ -1442,15 +1469,16 @@ function renderH2H(data) {
       '<div style="font-size:11px;color:var(--text-3)">H2H</div>' +
       '<div style="font-size:13px;font-weight:500;color:var(--red-text)">' + an + '</div>' +
     '</div>' +
-    row('Goals / 90', sumF(hP,'goals_p90'), sumF(aP,'goals_p90'), true) +
-    row('Assists / 90', sumF(hP,'assists_p90'), sumF(aP,'assists_p90'), true) +
-    row('Shots / 90', sumF(hP,'shots_p90'), sumF(aP,'shots_p90'), true) +
+    row('Goals / 90 (team)', sumF(hP,'goals_p90'), sumF(aP,'goals_p90'), true) +
+    row('Assists / 90 (team)', sumF(hP,'assists_p90'), sumF(aP,'assists_p90'), true) +
+    row('Shots / 90 (team)', sumF(hP,'shots_p90'), sumF(aP,'shots_p90'), true) +
     row('Shots on target / 90', sumF(hP,'shots_on_p90'), sumF(aP,'shots_on_p90'), true) +
     row('Fouls committed / 90', sumF(hP,'fouls_p90'), sumF(aP,'fouls_p90'), false) +
     row('Fouls drawn / 90', sumF(hP,'fouled_p90'), sumF(aP,'fouled_p90'), true) +
-    row('Tackles / 90', sumF(hP,'tackles_p90'), sumF(aP,'tackles_p90'), true) +
-    row('Goalscorer probability', sum(hP,'goalscorer_prob')+'%', sum(aP,'goalscorer_prob')+'%', true) +
-    row('Yellow card risk', sum(hP,'yellow_prob')+'%', sum(aP,'yellow_prob')+'%', false) +
+    row('Tackles / 90 (team)', sumF(hP,'tackles_p90'), sumF(aP,'tackles_p90'), true) +
+    row('Home clean sheet', window._lastResult ? (Math.exp(-window._lastResult.awayLambda)*100).toFixed(1)+'%' : '—', window._lastResult ? (Math.exp(-window._lastResult.homeLambda)*100).toFixed(1)+'%' : '—', true) +
+    row('Top scorer chance', top1(hP,'goalscorer_prob') ? top1(hP,'goalscorer_prob').goalscorer_prob+'%' : '—', top1(aP,'goalscorer_prob') ? top1(aP,'goalscorer_prob').goalscorer_prob+'%' : '—', true) +
+    row('Highest card risk', top1(hP,'yellow_prob') ? top1(hP,'yellow_prob').yellow_prob+'%' : '—', top1(aP,'yellow_prob') ? top1(aP,'yellow_prob').yellow_prob+'%' : '—', false) +
     '<div style="margin-top:1rem">' +
     '<div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Spotlight</div>' +
     spotlight(top1(hP,'goalscorer_prob'), hn, 'Most likely scorer') +
