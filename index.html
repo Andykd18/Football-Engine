@@ -900,25 +900,6 @@ const TEAMS = [
 
 const $ = id => document.getElementById(id);
 
-function toggleSection(id, header) {
-  const body  = document.getElementById(id);
-  const arrow = header.querySelector('.collapsible-arrow');
-  if (!body) return;
-  if (body.classList.contains('closed')) {
-    body.classList.remove('closed');
-    body.classList.add('open');
-    body.style.maxHeight = body.scrollHeight + 'px';
-    if (arrow) arrow.classList.add('open');
-  } else {
-    body.style.maxHeight = body.scrollHeight + 'px';
-    requestAnimationFrame(() => {
-      body.classList.add('closed');
-      body.classList.remove('open');
-      if (arrow) arrow.classList.remove('open');
-    });
-  }
-}
-
 function buildDropdowns() {
   ['hteam','ateam'].forEach((id, i) => {
     const sel = $(id);
@@ -1611,6 +1592,25 @@ run();
 loadFixtures();
 </script>
 <script>
+function toggleSection(id, header) {
+  const body  = document.getElementById(id);
+  const arrow = header.querySelector('.collapsible-arrow');
+  if (!body) return;
+  if (body.classList.contains('closed')) {
+    body.classList.remove('closed');
+    body.classList.add('open');
+    body.style.maxHeight = body.scrollHeight + 'px';
+    if (arrow) arrow.classList.add('open');
+  } else {
+    body.style.maxHeight = body.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      body.classList.add('closed');
+      body.classList.remove('open');
+      if (arrow) arrow.classList.remove('open');
+    });
+  }
+}
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/Football-Engine/sw.js')
