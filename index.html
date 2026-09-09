@@ -1596,18 +1596,10 @@ function toggleSection(id, header) {
   const body  = document.getElementById(id);
   const arrow = header.querySelector('.collapsible-arrow');
   if (!body) return;
-  if (body.classList.contains('closed')) {
-    body.classList.remove('closed');
-    body.classList.add('open');
-    body.style.maxHeight = body.scrollHeight + 'px';
-    if (arrow) arrow.classList.add('open');
-  } else {
-    body.style.maxHeight = body.scrollHeight + 'px';
-    requestAnimationFrame(() => {
-      body.classList.add('closed');
-      body.classList.remove('open');
-      if (arrow) arrow.classList.remove('open');
-    });
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : '';
+  if (arrow) {
+    arrow.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
   }
 }
 
