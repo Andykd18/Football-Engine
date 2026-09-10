@@ -622,17 +622,127 @@ def api_players():
 
         # Sort by goalscorer probability
         result.sort(key=lambda x: x["goalscorer_prob"], reverse=True)
-        return result
+        return result, len(players_raw) > 0 and len(stats_data) == 0
 
     try:
-        home_players = get_squad_stats(home_id, home)
-        away_players = get_squad_stats(away_id, away)
+        home_players, home_no_stats = get_squad_stats(home_id, home)
+        away_players, away_no_stats = get_squad_stats(away_id, away)
         return jsonify({
-            "home": {"team": home, "players": home_players},
-            "away": {"team": away, "players": away_players},
+            "home": {"team": home, "players": home_players, "no_stats_yet": home_no_stats},
+            "away": {"team": away, "players": away_players, "no_stats_yet": away_no_stats},
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/context")
+def api_context():
+    """
+    Fetch referee assignment and injury/suspension list for the fixture.
+    Referee card tendency calculated from their last 10 games where available.
+    """
+    home = request.args.get("home", "")
+    away = request.args.get("away", "")
+
+    if not home or not away:
+        return jsonify({"error": "Provide home and away team names"}), 400
+
+    home_id = APIFOOTBALL_TEAM_IDS.get(home)
+    away_id = APIFOOTBALL_TEAM_IDS.get(away)
+
+    result = {"referee": None, "injuries": {"home": [], "away": []}}
+
+    try:
+        # Find the upcoming fixture to get referee name
+        resp = requests.get(
+            f"{APIFOOTBALL_BASE}/fixtures",
+            headers=_headers(),
+            params={"team": home_id, "league": EPL_LEAGUE_ID, "season": SEASON, "next": 5},
+            timeout=15
+        )
+        resp.raise_for_status()
+        fixtures = resp.json().get("response", [])
+
+        ref_name = None
+        for f in fixtures:
+            teams = f.get("teams", {})
+            h_id = teams.get("home", {}).get("id")
+            a_id = teams.get("away", {}).get("id")
+            if (h_id == home_id and a_id == away_id) or (h_id == away_id and a_id == home_id):
+                ref_name = f.get("fixture", {}).get("referee")
+                break
+
+        if ref_name:
+            # Get referee's recent card average — search their last 10 games with this name
+            ref_resp = requests.get(
+                f"{APIFOOTBALL_BASE}/fixtures",
+                headers=_headers(),
+                params={"league": EPL_LEAGUE_ID, "season": SEASON, "last": 30},
+                timeout=15
+            )
+            ref_fixtures = ref_resp.json().get("response", [])
+            ref_games = [f for f in ref_fixtures if f.get("fixture", {}).get("referee") == ref_name]
+
+            total_cards = 0
+            games_counted = 0
+            for rf in ref_games[:10]:
+                fixture_id = rf.get("fixture", {}).get("id")
+                stats_resp = requests.get(
+                    f"{APIFOOTBALL_BASE}/fixtures/statistics",
+                    headers=_headers(),
+                    params={"fixture": fixture_id},
+                    timeout=15
+                )
+                stats = stats_resp.json().get("response", [])
+                for team_stat in stats:
+                    for stat in team_stat.get("statistics", []):
+                        if stat.get("type") == "Yellow Cards" and stat.get("value"):
+                            total_cards += int(stat.get("value"))
+                if stats:
+                    games_counted += 1
+                time.sleep(0.3)
+
+            avg_cards = round(total_cards / games_counted, 2) if games_counted > 0 else None
+            tendency = None
+            if avg_cards is not None:
+                if avg_cards >= 4.5:
+                    tendency = "high"
+                elif avg_cards >= 3.0:
+                    tendency = "average"
+                else:
+                    tendency = "low"
+
+            result["referee"] = {
+                "name": ref_name,
+                "avg_cards_per_game": avg_cards,
+                "tendency": tendency,
+                "games_sampled": games_counted,
+            }
+    except Exception as e:
+        result["referee_error"] = str(e)
+
+    try:
+        for team_id, side in [(home_id, "home"), (away_id, "away")]:
+            inj_resp = requests.get(
+                f"{APIFOOTBALL_BASE}/injuries",
+                headers=_headers(),
+                params={"team": team_id, "season": SEASON, "league": EPL_LEAGUE_ID},
+                timeout=15
+            )
+            inj_data = inj_resp.json().get("response", [])
+            injuries = []
+            for inj in inj_data[:10]:
+                player = inj.get("player", {})
+                injuries.append({
+                    "name":   player.get("name"),
+                    "type":   inj.get("player", {}).get("type", "Injury"),
+                    "reason": player.get("reason", ""),
+                })
+            result["injuries"][side] = injuries
+    except Exception as e:
+        result["injuries_error"] = str(e)
+
+    return jsonify(result)
 
 if __name__ == "__main__":
     print("\n  Pricing Engine server starting...\n")
