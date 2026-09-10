@@ -701,9 +701,29 @@
     <button class="tab-btn active" onclick="switchTab('tab-h2h', this);loadPlayers()"><i class="ti ti-arrows-left-right" aria-hidden="true"></i>H2H</button>
     <button class="tab-btn" onclick="switchTab('tab-players', this);loadPlayers()"><i class="ti ti-user" aria-hidden="true"></i>Players</button>
     <button class="tab-btn" onclick="switchTab('tab-cc', this)"><i class="ti ti-rectangle-vertical" aria-hidden="true"></i>Corners &amp; cards</button>
+    <button class="tab-btn" onclick="switchTab('tab-off', this)"><i class="ti ti-target-arrow" aria-hidden="true"></i>Offensive</button>
     <button class="tab-btn" onclick="switchTab('tab-def', this)"><i class="ti ti-shield" aria-hidden="true"></i>Defensive</button>
     <button class="tab-btn" onclick="switchTab('tab-sc', this)"><i class="ti ti-grid-dots" aria-hidden="true"></i>Scorelines</button>
     </div>
+
+  <div id="tab-off" class="tab-panel">
+  <div class="section-title" style="margin-top:1.5rem">Attacking output</div>
+  <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
+    <div class="oc"><div class="oc-bar" id="hxg-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hxg-lbl">Home xG</div><div class="oc-pct" id="hxg-disp">—</div><div class="oc-imp" id="hxg-sub">Expected goals</div></div>
+    <div class="oc"><div class="oc-bar" id="axg-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="axg-lbl">Away xG</div><div class="oc-pct" id="axg-disp">—</div><div class="oc-imp" id="axg-sub">Expected goals</div></div>
+  </div>
+  <div class="section-title">Total goals markets</div>
+  <div class="outcomes" style="grid-template-columns:repeat(3,1fr);margin-bottom:0.75rem">
+    <div class="oc"><div class="oc-lbl">Over 1.5</div><div class="oc-pct" id="o15-pct">—</div><div class="oc-imp" id="o15-sub">Total goals</div></div>
+    <div class="oc"><div class="oc-lbl">Over 2.5</div><div class="oc-pct" id="o25b-pct">—</div><div class="oc-imp" id="o25b-sub">Total goals</div></div>
+    <div class="oc"><div class="oc-lbl">Over 3.5</div><div class="oc-pct" id="o35-pct">—</div><div class="oc-imp" id="o35-sub">Total goals</div></div>
+  </div>
+  <div class="outcomes" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
+    <div class="oc"><div class="oc-lbl">Under 1.5</div><div class="oc-pct" id="u15-pct">—</div><div class="oc-imp" id="u15-sub">Total goals</div></div>
+    <div class="oc"><div class="oc-lbl">Under 2.5</div><div class="oc-pct" id="u25b-pct">—</div><div class="oc-imp" id="u25b-sub">Total goals</div></div>
+    <div class="oc"><div class="oc-lbl">Under 3.5</div><div class="oc-pct" id="u35-pct">—</div><div class="oc-imp" id="u35-sub">Total goals</div></div>
+  </div>
+  </div>
 
   <div id="tab-def" class="tab-panel">
   <div class="section-title" style="margin-top:1.5rem">Defensive &amp; market stats</div>
@@ -1079,13 +1099,17 @@ function run() {
 
   // ── Defensive & market stats ──
   // BTTS: both teams score at least 1
-  let btts = 0, o25 = 0, u25 = 0;
+  let btts = 0, o25 = 0, u25 = 0, o15 = 0, u15 = 0, o35 = 0, u35 = 0;
   for (let h = 0; h <= MAX; h++) {
     for (let a = 0; a <= MAX; a++) {
       const p = grid[h][a];
       if (h >= 1 && a >= 1) btts += p;
       if (h + a > 2.5)      o25  += p;
       if (h + a < 2.5)      u25  += p;
+      if (h + a > 1.5)      o15  += p;
+      if (h + a < 1.5)      u15  += p;
+      if (h + a > 3.5)      o35  += p;
+      if (h + a < 3.5)      u35  += p;
     }
   }
 
@@ -1100,6 +1124,20 @@ function run() {
   $('btts-sub').textContent = btts > 0.55 ? 'Likely' : btts > 0.45 ? 'Marginal' : 'Unlikely';
   $('o25-sub').textContent  = o25  > 0.55 ? 'Likely' : o25  > 0.45 ? 'Marginal' : 'Unlikely';
   $('u25-sub').textContent  = u25  > 0.55 ? 'Likely' : u25  > 0.45 ? 'Marginal' : 'Unlikely';
+
+  // Offensive tab: xG display and additional goal lines
+  const hxgEl = $('hxg-disp'), axgEl = $('axg-disp');
+  if (hxgEl) { hxgEl.textContent = hxgF.toFixed(2); $('hxg-bar').style.width = Math.min(hxgF/4*100,100) + '%'; }
+  if (axgEl) { axgEl.textContent = axgF.toFixed(2); $('axg-bar').style.width = Math.min(axgF/4*100,100) + '%'; }
+  const o15El = $('o15-pct');
+  if (o15El) {
+    o15El.textContent = (o15*100).toFixed(1) + '%';
+    $('u15-pct').textContent = (u15*100).toFixed(1) + '%';
+    $('o25b-pct').textContent = (o25*100).toFixed(1) + '%';
+    $('u25b-pct').textContent = (u25*100).toFixed(1) + '%';
+    $('o35-pct').textContent = (o35*100).toFixed(1) + '%';
+    $('u35-pct').textContent = (u35*100).toFixed(1) + '%';
+  }
 
   // Win & BTTS combo markets
   let hwBtts = 0, awBtts = 0, drBtts = 0;
