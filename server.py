@@ -730,14 +730,21 @@ def api_context():
                 timeout=15
             )
             inj_data = inj_resp.json().get("response", [])
+            seen_names = set()
             injuries = []
-            for inj in inj_data[:10]:
+            for inj in inj_data:
                 player = inj.get("player", {})
+                name = player.get("name")
+                if not name or name in seen_names:
+                    continue
+                seen_names.add(name)
                 injuries.append({
-                    "name":   player.get("name"),
-                    "type":   inj.get("player", {}).get("type", "Injury"),
+                    "name":   name,
+                    "type":   player.get("type", "Injury"),
                     "reason": player.get("reason", ""),
                 })
+                if len(injuries) >= 10:
+                    break
             result["injuries"][side] = injuries
     except Exception as e:
         result["injuries_error"] = str(e)
