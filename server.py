@@ -597,6 +597,8 @@ def api_players():
             lam = s.get("goals_p90", 0)
             goalscorer_prob = round((1 - math.exp(-lam)) * 100, 1) if lam > 0 else 0
             yellow_prob     = round((1 - math.exp(-s.get("yellows_p90", 0))) * 100, 1)
+            assist_prob     = round((1 - math.exp(-s.get("assists_p90", 0))) * 100, 1)
+            low_sample      = s.get("minutes", 0) < 450
 
             result.append({
                 "id":               pid,
@@ -614,6 +616,8 @@ def api_players():
                 "saves_p90":        s.get("saves_p90", 0),
                 "goalscorer_prob":  goalscorer_prob,
                 "yellow_prob":      yellow_prob,
+                "assist_prob":      assist_prob,
+                "low_sample":       low_sample,
             })
 
         # Sort by goalscorer probability
