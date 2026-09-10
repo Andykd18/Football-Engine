@@ -651,7 +651,6 @@
     </button>
     <button class="calc-btn" onclick="calculate()">Calculate</button>
   </div>
-  <div class="fetch-status" id="fetch-status"></div>
   </div>
 
   <div class="fetch-status" id="fetch-status">Contacting server...</div>
@@ -881,7 +880,7 @@ async function fetchData() {
     status.textContent = msgs.join(' · ');
     fetchComplete = true;
     calculate();
-    document.getElementById('fetch-status').textContent = '';
+    var fs = document.getElementById('fetch-status'); fs.textContent = ''; fs.className = 'fetch-status';
 
   } catch (e) {
     status.className = 'fetch-status err';
