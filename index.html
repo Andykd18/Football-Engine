@@ -702,6 +702,13 @@
     <div class="oc"><div class="oc-lbl">Over 2.5 goals</div><div class="oc-pct" id="o25-pct">&#x2014;</div><div class="oc-imp" id="o25-sub">Total goals market</div></div>
     <div class="oc"><div class="oc-lbl">Under 2.5 goals</div><div class="oc-pct" id="u25-pct">&#x2014;</div><div class="oc-imp" id="u25-sub">Total goals market</div></div>
   </div>
+
+  <div class="section-title">Win &amp; BTTS combos</div>
+  <div class="outcomes" id="combo-markets" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
+    <div class="oc"><div class="oc-lbl">—</div><div class="oc-pct">—</div></div>
+    <div class="oc"><div class="oc-lbl">—</div><div class="oc-pct">—</div></div>
+    <div class="oc"><div class="oc-lbl">—</div><div class="oc-pct">—</div></div>
+  </div>
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
     <div class="oc"><div class="oc-bar" id="hcs-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hcs-lbl">Home clean sheet</div><div class="oc-pct" id="hcs-pct">&#x2014;</div><div class="oc-imp" id="hcs-sub">&#x2014;</div></div>
     <div class="oc"><div class="oc-bar" id="acs-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="acs-lbl">Away clean sheet</div><div class="oc-pct" id="acs-pct">&#x2014;</div><div class="oc-imp" id="acs-sub">&#x2014;</div></div>
@@ -1093,6 +1100,26 @@ function run() {
   $('o25-sub').textContent  = o25  > 0.55 ? 'Likely' : o25  > 0.45 ? 'Marginal' : 'Unlikely';
   $('u25-sub').textContent  = u25  > 0.55 ? 'Likely' : u25  > 0.45 ? 'Marginal' : 'Unlikely';
 
+  // Win & BTTS combo markets
+  let hwBtts = 0, awBtts = 0, drBtts = 0;
+  for (let h = 0; h <= MAX; h++) {
+    for (let a = 0; a <= MAX; a++) {
+      const p = grid[h][a];
+      if (h >= 1 && a >= 1) {
+        if (h > a) hwBtts += p;
+        else if (a > h) awBtts += p;
+        else drBtts += p;
+      }
+    }
+  }
+  const comboEl = document.getElementById('combo-markets');
+  if (comboEl) {
+    comboEl.innerHTML =
+      '<div class="oc"><div class="oc-lbl">' + hName + ' win &amp; BTTS</div><div class="oc-pct">' + (hwBtts*100).toFixed(1) + '%</div><div class="oc-imp">Combo market</div></div>' +
+      '<div class="oc"><div class="oc-lbl">' + aName + ' win &amp; BTTS</div><div class="oc-pct">' + (awBtts*100).toFixed(1) + '%</div><div class="oc-imp">Combo market</div></div>' +
+      '<div class="oc"><div class="oc-lbl">Draw &amp; BTTS</div><div class="oc-pct">' + (drBtts*100).toFixed(1) + '%</div><div class="oc-imp">Combo market</div></div>';
+  }
+
   $('hcs-lbl').textContent = hName + ' clean sheet';
   $('acs-lbl').textContent = aName + ' clean sheet';
   $('hcs-pct').textContent = (hCS*100).toFixed(1) + '%';
@@ -1450,13 +1477,15 @@ function renderPlayers(data) {
           '<td style="padding:7px 8px;text-align:right;color:'+yc+';font-size:12px">' + p.yellow_prob + '%</td>' +
         '</tr>';
       }
+      var lowFlag = p.low_sample ? ' <span title="Based on limited minutes this season" style="color:var(--text-3);font-size:9px;">&#9888;</span>' : '';
+      var assistCol = p.assist_prob != null ? p.assist_prob + '%' : p.assists_p90.toFixed(1);
       return '<tr style="border-bottom:0.5px solid var(--border)">' +
-        '<td style="padding:7px 8px;color:'+nameCol+';font-weight:500;font-size:12px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.name + '</td>' +
+        '<td style="padding:7px 8px;color:'+nameCol+';font-weight:500;font-size:12px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.name + lowFlag + '</td>' +
         '<td style="padding:7px 8px;color:var(--text-3);font-size:11px">' + (p.position||'').slice(0,3) + '</td>' +
         '<td style="padding:7px 8px;text-align:right;color:'+sc+';font-size:12px;font-weight:500">' + p.goalscorer_prob + '%</td>' +
         '<td style="padding:7px 8px;text-align:right;color:'+yc+';font-size:12px">' + p.yellow_prob + '%</td>' +
         '<td style="padding:7px 8px;text-align:right;color:var(--text-2);font-size:12px">' + p.shots_on_p90.toFixed(1) + '</td>' +
-        '<td style="padding:7px 8px;text-align:right;color:var(--text-2);font-size:12px">' + p.assists_p90.toFixed(1) + '</td>' +
+        '<td style="padding:7px 8px;text-align:right;color:var(--text-2);font-size:12px">' + assistCol + '</td>' +
       '</tr>';
     }).join('');
 
@@ -1469,7 +1498,7 @@ function renderPlayers(data) {
         '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">Scorer</th>' +
         '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">Card</th>' +
         '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">SoT</th>' +
-        '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">Ast</th>' +
+        '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">Assist%</th>' +
       '</tr></thead>' +
       '<tbody>' + rows + '</tbody></table></div>';
   }
