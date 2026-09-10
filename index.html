@@ -853,16 +853,65 @@ async function fetchData() {
 
     let msgs = [];
 
-    // xG
     if (data.xg && !data.xg.error) {
       $('hxg').value = data.xg.home_lambda;
       $('axg').value = data.xg.away_lambda;
       msgs.push(`xG loaded (last ${data.xg.home.matches_used} matches)`);
+
+      const h = data.xg.home, a = data.xg.away;
+      const hName = h.team, aName = a.team;
+
+      $('hc-lbl').textContent = hName + ' corners';
+      $('ac-lbl').textContent = aName + ' corners';
+      if (h.corners_for != null) {
+        $('hc-avg').textContent = h.corners_for.toFixed(1);
+        $('hc-sub').textContent = 'For: ' + h.corners_for + ' · Against: ' + h.corners_against;
+        const maxC = Math.max(h.corners_for, a.corners_for || 0, 1);
+        $('hc-bar').style.width = (h.corners_for / maxC * 100).toFixed(0) + '%';
+      }
+      if (a.corners_for != null) {
+        $('ac-avg').textContent = a.corners_for.toFixed(1);
+        $('ac-sub').textContent = 'For: ' + a.corners_for + ' · Against: ' + a.corners_against;
+        const maxC = Math.max(h.corners_for || 0, a.corners_for, 1);
+        $('ac-bar').style.width = (a.corners_for / maxC * 100).toFixed(0) + '%';
+      }
+
+      $('hy-lbl').textContent = hName + ' yellows';
+      $('ay-lbl').textContent = aName + ' yellows';
+      if (h.yellow_cards_for != null) { $('hy-avg').textContent = h.yellow_cards_for.toFixed(1); $('hy-sub').textContent = 'Avg per match'; }
+      if (a.yellow_cards_for != null) { $('ay-avg').textContent = a.yellow_cards_for.toFixed(1); $('ay-sub').textContent = 'Avg per match'; }
+
+      $('hr-lbl').textContent = hName + ' reds';
+      $('ar-lbl').textContent = aName + ' reds';
+      $('hr-avg').textContent = (h.red_cards_for != null && h.red_cards_for > 0) ? h.red_cards_for.toFixed(2) : '0';
+      $('ar-avg').textContent = (a.red_cards_for != null && a.red_cards_for > 0) ? a.red_cards_for.toFixed(2) : '0';
+      $('hr-sub').textContent = 'Avg per match';
+      $('ar-sub').textContent = 'Avg per match';
+
+      $('hs-lbl').textContent = hName + ' shots';
+      $('as-lbl').textContent = aName + ' shots';
+      if (h.shots_for != null) {
+        $('hs-avg').textContent = h.shots_for.toFixed(1);
+        $('hs-sub').textContent = 'Faced: ' + (h.shots_against != null ? h.shots_against : '—') + ' avg';
+        const maxS = Math.max(h.shots_for, a.shots_for || 0, 1);
+        $('hs-bar').style.width = (h.shots_for / maxS * 100).toFixed(0) + '%';
+      }
+      if (a.shots_for != null) {
+        $('as-avg').textContent = a.shots_for.toFixed(1);
+        $('as-sub').textContent = 'Faced: ' + (a.shots_against != null ? a.shots_against : '—') + ' avg';
+        const maxS = Math.max(h.shots_for || 0, a.shots_for, 1);
+        $('as-bar').style.width = (a.shots_for / maxS * 100).toFixed(0) + '%';
+      }
+
+      $('hf-lbl').textContent = hName + ' fouls';
+      $('af-lbl').textContent = aName + ' fouls';
+      if (h.fouls_for != null) { $('hf-avg').textContent = h.fouls_for.toFixed(1); $('hf-sub').textContent = 'Avg per match'; }
+      if (a.fouls_for != null) { $('af-avg').textContent = a.fouls_for.toFixed(1); $('af-sub').textContent = 'Avg per match'; }
+
     } else if (data.xg?.error) {
       msgs.push(`xG: ${data.xg.error}`);
     }
 
-    // Odds
     if (data.odds && !data.odds.error) {
       $('hodds').value = data.odds.home_odds ? decimalToFraction(data.odds.home_odds) : $('hodds').value;
       $('dodds').value = data.odds.draw_odds ? decimalToFraction(data.odds.draw_odds) : $('dodds').value;
@@ -880,7 +929,11 @@ async function fetchData() {
     status.textContent = msgs.join(' · ');
     fetchComplete = true;
     calculate();
-    var fs = document.getElementById('fetch-status'); fs.textContent = ''; fs.className = 'fetch-status';
+
+    setTimeout(() => {
+      status.textContent = '';
+      status.className = 'fetch-status';
+    }, 4000);
 
   } catch (e) {
     status.className = 'fetch-status err';
