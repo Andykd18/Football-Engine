@@ -563,6 +563,19 @@
   .fixture-loading{font-size:12px;color:var(--text-3);padding:8px 0;}
   .collapsible-arrow{font-size:13px;color:var(--text-3);transition:transform .2s ease;pointer-events:none;}
   .collapsible-arrow.rotated{transform:rotate(180deg);}
+  @keyframes skeleton-pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.7; }
+  }
+  .skel {
+    background: var(--surface2);
+    border-radius: 4px;
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+    display: inline-block;
+  }
+  .skel-text { height: 22px; width: 48px; }
+  .skel-sub { height: 11px; width: 64px; margin-top: 4px; }
+  .skel-badge { height: 16px; width: 44px; border-radius: 4px; }
 </style>
 <body>
 <div class="page">
@@ -669,23 +682,23 @@
     <div class="oc">
       <div class="oc-bar" id="hbar" style="background:var(--blue);width:0%"></div>
       <div class="oc-lbl" id="hlbl">Home win</div>
-      <div class="oc-pct" id="hpct">—</div>
+      <div class="oc-pct" id="hpct"><span class="skel skel-text"></span></div>
       <div class="oc-imp" id="himp">—</div>
-      <span class="badge bf" id="hbadge">—</span>
+      <span class="skel skel-badge" id="hbadge"></span>
     </div>
     <div class="oc">
       <div class="oc-bar" id="dbar" style="background:var(--green);width:0%"></div>
       <div class="oc-lbl">Draw</div>
-      <div class="oc-pct" id="dpct">—</div>
+      <div class="oc-pct" id="dpct"><span class="skel skel-text"></span></div>
       <div class="oc-imp" id="dimp">—</div>
-      <span class="badge bf" id="dbadge">—</span>
+      <span class="skel skel-badge" id="dbadge"></span>
     </div>
     <div class="oc">
       <div class="oc-bar" id="abar" style="background:var(--red);width:0%"></div>
       <div class="oc-lbl" id="albl">Away win</div>
-      <div class="oc-pct" id="apct">—</div>
+      <div class="oc-pct" id="apct"><span class="skel skel-text"></span></div>
       <div class="oc-imp" id="aimp">—</div>
-      <span class="badge bf" id="abadge">—</span>
+      <span class="skel skel-badge" id="abadge"></span>
     </div>
   </div>
 
@@ -709,60 +722,60 @@
   <div id="tab-off" class="tab-panel">
   <div class="section-title" style="margin-top:1.5rem">Attacking output</div>
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
-    <div class="oc"><div class="oc-bar" id="hxg-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hxg-lbl">Home xG</div><div class="oc-pct" id="hxg-disp">—</div><div class="oc-imp" id="hxg-sub">Expected goals</div></div>
-    <div class="oc"><div class="oc-bar" id="axg-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="axg-lbl">Away xG</div><div class="oc-pct" id="axg-disp">—</div><div class="oc-imp" id="axg-sub">Expected goals</div></div>
+    <div class="oc"><div class="oc-bar" id="hxg-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hxg-lbl">Home xG</div><div class="oc-pct" id="hxg-disp"><span class="skel skel-text"></span></div><div class="oc-imp" id="hxg-sub">Expected goals</div></div>
+    <div class="oc"><div class="oc-bar" id="axg-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="axg-lbl">Away xG</div><div class="oc-pct" id="axg-disp"><span class="skel skel-text"></span></div><div class="oc-imp" id="axg-sub">Expected goals</div></div>
   </div>
   <div class="section-title">Total goals markets</div>
   <div class="outcomes" style="grid-template-columns:repeat(3,1fr);margin-bottom:0.75rem">
-    <div class="oc"><div class="oc-lbl">Over 1.5</div><div class="oc-pct" id="o15-pct">—</div><div class="oc-imp" id="o15-sub">Total goals</div></div>
-    <div class="oc"><div class="oc-lbl">Over 2.5</div><div class="oc-pct" id="o25b-pct">—</div><div class="oc-imp" id="o25b-sub">Total goals</div></div>
-    <div class="oc"><div class="oc-lbl">Over 3.5</div><div class="oc-pct" id="o35-pct">—</div><div class="oc-imp" id="o35-sub">Total goals</div></div>
+    <div class="oc"><div class="oc-lbl">Over 1.5</div><div class="oc-pct" id="o15-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="o15-sub">Total goals</div></div>
+    <div class="oc"><div class="oc-lbl">Over 2.5</div><div class="oc-pct" id="o25b-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="o25b-sub">Total goals</div></div>
+    <div class="oc"><div class="oc-lbl">Over 3.5</div><div class="oc-pct" id="o35-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="o35-sub">Total goals</div></div>
   </div>
   <div class="outcomes" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
-    <div class="oc"><div class="oc-lbl">Under 1.5</div><div class="oc-pct" id="u15-pct">—</div><div class="oc-imp" id="u15-sub">Total goals</div></div>
-    <div class="oc"><div class="oc-lbl">Under 2.5</div><div class="oc-pct" id="u25b-pct">—</div><div class="oc-imp" id="u25b-sub">Total goals</div></div>
-    <div class="oc"><div class="oc-lbl">Under 3.5</div><div class="oc-pct" id="u35-pct">—</div><div class="oc-imp" id="u35-sub">Total goals</div></div>
+    <div class="oc"><div class="oc-lbl">Under 1.5</div><div class="oc-pct" id="u15-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="u15-sub">Total goals</div></div>
+    <div class="oc"><div class="oc-lbl">Under 2.5</div><div class="oc-pct" id="u25b-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="u25b-sub">Total goals</div></div>
+    <div class="oc"><div class="oc-lbl">Under 3.5</div><div class="oc-pct" id="u35-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="u35-sub">Total goals</div></div>
   </div>
   </div>
 
   <div id="tab-def" class="tab-panel">
   <div class="section-title" style="margin-top:1.5rem">Defensive &amp; market stats</div>
   <div class="outcomes" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">
-    <div class="oc"><div class="oc-lbl">BTTS</div><div class="oc-pct" id="btts-pct">&#x2014;</div><div class="oc-imp" id="btts-sub">Both teams to score</div></div>
-    <div class="oc"><div class="oc-lbl">Over 2.5 goals</div><div class="oc-pct" id="o25-pct">&#x2014;</div><div class="oc-imp" id="o25-sub">Total goals market</div></div>
-    <div class="oc"><div class="oc-lbl">Under 2.5 goals</div><div class="oc-pct" id="u25-pct">&#x2014;</div><div class="oc-imp" id="u25-sub">Total goals market</div></div>
+    <div class="oc"><div class="oc-lbl">BTTS</div><div class="oc-pct" id="btts-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="btts-sub">Both teams to score</div></div>
+    <div class="oc"><div class="oc-lbl">Over 2.5 goals</div><div class="oc-pct" id="o25-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="o25-sub">Total goals market</div></div>
+    <div class="oc"><div class="oc-lbl">Under 2.5 goals</div><div class="oc-pct" id="u25-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="u25-sub">Total goals market</div></div>
   </div>
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
-    <div class="oc"><div class="oc-bar" id="hcs-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hcs-lbl">Home clean sheet</div><div class="oc-pct" id="hcs-pct">&#x2014;</div><div class="oc-imp" id="hcs-sub">&#x2014;</div></div>
-    <div class="oc"><div class="oc-bar" id="acs-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="acs-lbl">Away clean sheet</div><div class="oc-pct" id="acs-pct">&#x2014;</div><div class="oc-imp" id="acs-sub">&#x2014;</div></div>
+    <div class="oc"><div class="oc-bar" id="hcs-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hcs-lbl">Home clean sheet</div><div class="oc-pct" id="hcs-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="hcs-sub">&#x2014;</div></div>
+    <div class="oc"><div class="oc-bar" id="acs-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="acs-lbl">Away clean sheet</div><div class="oc-pct" id="acs-pct"><span class="skel skel-text"></span></div><div class="oc-imp" id="acs-sub">&#x2014;</div></div>
   </div>
   </div>
 
   <div id="tab-cc" class="tab-panel">
   <div class="section-title" style="margin-top:1.5rem">Corners &amp; cards</div>
   <div class="outcomes" id="totals-markets" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
-    <div class="oc"><div class="oc-lbl">Total corners O/U 9.5</div><div class="oc-pct" id="corners-ou">—</div><div class="oc-imp" id="corners-ou-sub">Combined market</div></div>
-    <div class="oc"><div class="oc-lbl">Total cards O/U 4.5</div><div class="oc-pct" id="cards-ou">—</div><div class="oc-imp" id="cards-ou-sub">Combined market</div></div>
+    <div class="oc"><div class="oc-lbl">Total corners O/U 9.5</div><div class="oc-pct" id="corners-ou"><span class="skel skel-text"></span></div><div class="oc-imp" id="corners-ou-sub">Combined market</div></div>
+    <div class="oc"><div class="oc-lbl">Total cards O/U 4.5</div><div class="oc-pct" id="cards-ou"><span class="skel skel-text"></span></div><div class="oc-imp" id="cards-ou-sub">Combined market</div></div>
   </div>
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
-    <div class="oc"><div class="oc-bar" id="hc-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hc-lbl">Home corners</div><div class="oc-pct" id="hc-avg">&#x2014;</div><div class="oc-imp" id="hc-sub">Avg per match</div></div>
-    <div class="oc"><div class="oc-bar" id="ac-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="ac-lbl">Away corners</div><div class="oc-pct" id="ac-avg">&#x2014;</div><div class="oc-imp" id="ac-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-bar" id="hc-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hc-lbl">Home corners</div><div class="oc-pct" id="hc-avg"><span class="skel skel-text"></span></div><div class="oc-imp" id="hc-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-bar" id="ac-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="ac-lbl">Away corners</div><div class="oc-pct" id="ac-avg"><span class="skel skel-text"></span></div><div class="oc-imp" id="ac-sub">Avg per match</div></div>
   </div>
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
-    <div class="oc"><div class="oc-lbl" id="hy-lbl">Home yellow cards</div><div class="oc-pct" id="hy-avg">&#x2014;</div><div class="oc-imp" id="hy-sub">Avg per match</div></div>
-    <div class="oc"><div class="oc-lbl" id="ay-lbl">Away yellow cards</div><div class="oc-pct" id="ay-avg">&#x2014;</div><div class="oc-imp" id="ay-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-lbl" id="hy-lbl">Home yellow cards</div><div class="oc-pct" id="hy-avg"><span class="skel skel-text"></span></div><div class="oc-imp" id="hy-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-lbl" id="ay-lbl">Away yellow cards</div><div class="oc-pct" id="ay-avg"><span class="skel skel-text"></span></div><div class="oc-imp" id="ay-sub">Avg per match</div></div>
   </div>
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
-    <div class="oc"><div class="oc-lbl" id="hr-lbl">Home red cards</div><div class="oc-pct" id="hr-avg">&#x2014;</div><div class="oc-imp" id="hr-sub">Avg per match</div></div>
-    <div class="oc"><div class="oc-lbl" id="ar-lbl">Away red cards</div><div class="oc-pct" id="ar-avg">&#x2014;</div><div class="oc-imp" id="ar-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-lbl" id="hr-lbl">Home red cards</div><div class="oc-pct" id="hr-avg"><span class="skel skel-text"></span></div><div class="oc-imp" id="hr-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-lbl" id="ar-lbl">Away red cards</div><div class="oc-pct" id="ar-avg"><span class="skel skel-text"></span></div><div class="oc-imp" id="ar-sub">Avg per match</div></div>
   </div>
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
-    <div class="oc"><div class="oc-bar" id="hs-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hs-lbl">Home total shots</div><div class="oc-pct" id="hs-avg">&#x2014;</div><div class="oc-imp" id="hs-sub">Avg per match</div></div>
-    <div class="oc"><div class="oc-bar" id="as-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="as-lbl">Away total shots</div><div class="oc-pct" id="as-avg">&#x2014;</div><div class="oc-imp" id="as-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-bar" id="hs-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hs-lbl">Home total shots</div><div class="oc-pct" id="hs-avg"><span class="skel skel-text"></span></div><div class="oc-imp" id="hs-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-bar" id="as-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="as-lbl">Away total shots</div><div class="oc-pct" id="as-avg"><span class="skel skel-text"></span></div><div class="oc-imp" id="as-sub">Avg per match</div></div>
   </div>
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
-    <div class="oc"><div class="oc-lbl" id="hf-lbl">Home fouls</div><div class="oc-pct" id="hf-avg">&#x2014;</div><div class="oc-imp" id="hf-sub">Avg per match</div></div>
-    <div class="oc"><div class="oc-lbl" id="af-lbl">Away fouls</div><div class="oc-pct" id="af-avg">&#x2014;</div><div class="oc-imp" id="af-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-lbl" id="hf-lbl">Home fouls</div><div class="oc-pct" id="hf-avg"><span class="skel skel-text"></span></div><div class="oc-imp" id="hf-sub">Avg per match</div></div>
+    <div class="oc"><div class="oc-lbl" id="af-lbl">Away fouls</div><div class="oc-pct" id="af-avg"><span class="skel skel-text"></span></div><div class="oc-imp" id="af-sub">Avg per match</div></div>
   </div>
   </div>
 
