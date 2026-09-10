@@ -579,6 +579,11 @@
     </div>
   </div>
 
+  <div id="summary-card" style="display:none;background:var(--surface);border:0.5px solid var(--border-mid);border-radius:var(--radius);padding:14px 16px;margin-bottom:0.75rem;">
+    <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Best value this match</div>
+    <div id="summary-content" style="display:flex;flex-direction:column;gap:6px;"></div>
+  </div>
+
   <button class="setup-btn" onclick="toggleSetup(this)">
     <span style="display:flex;align-items:center;gap:8px;pointer-events:none">
       <i class="ti ti-layout-2" style="font-size:14px;color:var(--red-text);" aria-hidden="true"></i>
@@ -1208,6 +1213,54 @@ function run() {
 
   // Store result so calculate() can save it to history
   window._lastResult = { hName, aName, hw, dr, aw, himp, dimp, aimp, minEdge, homeLambda: hl, awayLambda: al };
+  renderSummary(hName, aName, hw, dr, aw, himp, dimp, aimp, minEdge);
+}
+
+function renderSummary(hName, aName, hw, dr, aw, himp, dimp, aimp, minEdge) {
+  var card = document.getElementById('summary-card');
+  var content = document.getElementById('summary-content');
+  if (!card || !content) return;
+
+  var edges = [];
+  var hEdge = hw - himp, dEdge = dr - dimp, aEdge = aw - aimp;
+
+  if (hEdge >= minEdge) edges.push({ label: hName + ' to win', pct: (hw*100).toFixed(1)+'%', edge: hEdge });
+  if (dEdge >= minEdge) edges.push({ label: 'Draw', pct: (dr*100).toFixed(1)+'%', edge: dEdge });
+  if (aEdge >= minEdge) edges.push({ label: aName + ' to win', pct: (aw*100).toFixed(1)+'%', edge: aEdge });
+
+  // Check combo markets if rendered
+  var comboEl = document.getElementById('combo-markets');
+  if (comboEl) {
+    var comboItems = comboEl.querySelectorAll('.oc');
+    comboItems.forEach(function(item) {
+      var lbl = item.querySelector('.oc-lbl');
+      var pct = item.querySelector('.oc-pct');
+      if (lbl && pct) {
+        var val = parseFloat(pct.textContent);
+        if (val >= 55) edges.push({ label: lbl.textContent, pct: pct.textContent, edge: null });
+      }
+    });
+  }
+
+  if (edges.length === 0) {
+    card.style.display = 'none';
+    return;
+  }
+
+  edges.sort(function(a,b) {
+    if (a.edge == null) return 1;
+    if (b.edge == null) return -1;
+    return b.edge - a.edge;
+  });
+
+  card.style.display = 'block';
+  content.innerHTML = edges.slice(0,3).map(function(e) {
+    var edgeStr = e.edge != null ? '<span style="color:var(--green-text);font-size:11px;font-weight:500">+' + (e.edge*100).toFixed(1) + '% edge</span>' : '<span style="color:var(--text-3);font-size:11px">likely outcome</span>';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border)">' +
+      '<div style="font-size:13px;color:var(--text)">' + e.label + '</div>' +
+      '<div style="display:flex;align-items:center;gap:10px"><div style="font-size:13px;font-weight:500;color:var(--text)">' + e.pct + '</div>' + edgeStr + '</div>' +
+    '</div>';
+  }).join('');
 }
 
 function calculate() {
@@ -1574,10 +1627,15 @@ function renderPlayers(data) {
         '<div style="font-size:11px;color:var(--text-3);">Player stats not yet indexed for this team this season — check back once more games are played</div></div>';
     }
     var csPctVal = csPct != null ? (csPct * 100).toFixed(1) + '%' : null;
+    var outfieldPlayers = players.filter(function(p){return p.position!=='Goalkeeper';});
+    var scorerVals = outfieldPlayers.map(function(p){return p.goalscorer_prob;}).filter(function(v){return v>0;});
+    var medianScorer = scorerVals.length ? scorerVals.slice().sort(function(a,b){return a-b;})[Math.floor(scorerVals.length/2)] : 0;
+
     var rows = players.slice(0,15).map(function(p) {
       var isGK = p.position === 'Goalkeeper';
       var sc = p.goalscorer_prob >= 30 ? 'var(--green-text)' : p.goalscorer_prob >= 15 ? 'var(--text)' : 'var(--text-2)';
       var yc = p.yellow_prob >= 30 ? 'var(--red-text)' : 'var(--text-2)';
+      var isValue = !isGK && !p.low_sample && medianScorer > 0 && p.goalscorer_prob >= medianScorer * 1.6 && p.goalscorer_prob >= 20;
       var nameCol = isGK ? 'var(--gold-text,#d4b84a)' : 'var(--text)';
       if (isGK) {
         var csCol = csPct != null && csPct > 0.3 ? 'var(--green-text)' : 'var(--text-2)';
@@ -1592,8 +1650,9 @@ function renderPlayers(data) {
       var assistCol = p.assist_prob != null ? p.assist_prob + '%' : p.assists_p90.toFixed(1);
       var fgWeight = firstScorerWeight(p.position);
       var fgProb = fgWeight > 0 ? Math.min(p.goalscorer_prob * fgWeight * 0.4, 40).toFixed(1) : '0.0';
+      var valueBadge = isValue ? ' <span style="background:var(--green-light);color:var(--green-text);font-size:8px;padding:1px 4px;border-radius:3px;vertical-align:middle">VALUE</span>' : '';
       return '<tr style="border-bottom:0.5px solid var(--border)">' +
-        '<td style="padding:7px 8px;color:'+nameCol+';font-weight:500;font-size:12px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.name + lowFlag + '</td>' +
+        '<td style="padding:7px 8px;color:'+nameCol+';font-weight:500;font-size:12px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.name + lowFlag + valueBadge + '</td>' +
         '<td style="padding:7px 8px;color:var(--text-3);font-size:11px">' + (p.position||'').slice(0,3) + '</td>' +
         '<td style="padding:7px 8px;text-align:right;color:'+sc+';font-size:12px;font-weight:500">' + p.goalscorer_prob + '%</td>' +
         '<td style="padding:7px 8px;text-align:right;color:var(--text-2);font-size:11px">' + fgProb + '%</td>' +
