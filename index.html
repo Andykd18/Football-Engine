@@ -724,6 +724,10 @@
 
   <div id="tab-cc" class="tab-panel">
   <div class="section-title" style="margin-top:1.5rem">Corners &amp; cards</div>
+  <div class="outcomes" id="totals-markets" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
+    <div class="oc"><div class="oc-lbl">Total corners O/U 9.5</div><div class="oc-pct" id="corners-ou">—</div><div class="oc-imp" id="corners-ou-sub">Combined market</div></div>
+    <div class="oc"><div class="oc-lbl">Total cards O/U 4.5</div><div class="oc-pct" id="cards-ou">—</div><div class="oc-imp" id="cards-ou-sub">Combined market</div></div>
+  </div>
   <div class="outcomes" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.75rem">
     <div class="oc"><div class="oc-bar" id="hc-bar" style="background:var(--blue);width:0%"></div><div class="oc-lbl" id="hc-lbl">Home corners</div><div class="oc-pct" id="hc-avg">&#x2014;</div><div class="oc-imp" id="hc-sub">Avg per match</div></div>
     <div class="oc"><div class="oc-bar" id="ac-bar" style="background:var(--red);width:0%"></div><div class="oc-lbl" id="ac-lbl">Away corners</div><div class="oc-pct" id="ac-avg">&#x2014;</div><div class="oc-imp" id="ac-sub">Avg per match</div></div>
@@ -801,6 +805,10 @@
   <div id="tab-h2h" class="tab-panel active">
     <div id="h2h-content">
       <div style="font-size:12px;color:var(--text-3);padding:1rem 0;text-align:center;">Select a fixture to load H2H comparison</div>
+    </div>
+    <div class="section-title" style="margin-top:1.5rem">Match context</div>
+    <div id="context-block">
+      <div style="font-size:11px;color:var(--text-3);padding:0.5rem 0;">Loading referee and injury data...</div>
     </div>
   </div>
 
@@ -922,6 +930,22 @@ async function fetchData() {
       if (h.fouls_for != null) { $('hf-avg').textContent = h.fouls_for.toFixed(1); $('hf-sub').textContent = 'Avg per match'; }
       if (a.fouls_for != null) { $('af-avg').textContent = a.fouls_for.toFixed(1); $('af-sub').textContent = 'Avg per match'; }
 
+      // Total corners and cards O/U markets (Poisson)
+      if (h.corners_for != null && a.corners_for != null) {
+        const totalCornersLambda = (h.corners_for + a.corners_for) / 2 + (h.corners_against + a.corners_against) / 4;
+        const overCorners = 1 - poissonCDF(9, totalCornersLambda);
+        $('corners-ou').textContent = (overCorners*100).toFixed(1) + '% over';
+        $('corners-ou-sub').textContent = 'Expected total: ' + totalCornersLambda.toFixed(1);
+      }
+      if (h.yellow_cards_for != null && a.yellow_cards_for != null) {
+        const hCards = h.yellow_cards_for + (h.red_cards_for || 0);
+        const aCards = a.yellow_cards_for + (a.red_cards_for || 0);
+        const totalCardsLambda = hCards + aCards;
+        const overCards = 1 - poissonCDF(4, totalCardsLambda);
+        $('cards-ou').textContent = (overCards*100).toFixed(1) + '% over';
+        $('cards-ou-sub').textContent = 'Expected total: ' + totalCardsLambda.toFixed(1);
+      }
+
     } else if (data.xg?.error) {
       msgs.push(`xG: ${data.xg.error}`);
     }
@@ -1025,6 +1049,13 @@ function poisson(lam, k) {
   let lp = -lam + k * Math.log(lam);
   for (let i = 2; i <= k; i++) lp -= Math.log(i);
   return Math.exp(lp);
+}
+
+function poissonCDF(k, lam) {
+  // P(X <= k)
+  let sum = 0;
+  for (let i = 0; i <= k; i++) sum += poisson(lam, i);
+  return sum;
 }
 
 function setBadge(el, edge, min) {
@@ -1426,6 +1457,66 @@ function selectFixture(i) {
 let playersData = null;
 let fetchComplete = false;
 
+let contextData = null;
+
+async function loadContext() {
+  var home = document.getElementById('hteam').value;
+  var away = document.getElementById('ateam').value;
+  if (contextData && contextData._home === home && contextData._away === away) {
+    renderContext(contextData);
+    return;
+  }
+  try {
+    var res = await fetch(SERVER + '/api/context?home=' + encodeURIComponent(home) + '&away=' + encodeURIComponent(away));
+    var data = await res.json();
+    contextData = data;
+    contextData._home = home;
+    contextData._away = away;
+    renderContext(data);
+  } catch(e) {
+    console.log('Context fetch failed', e);
+  }
+}
+
+function renderContext(data) {
+  var el = document.getElementById('context-block');
+  if (!el) return;
+  var html = '';
+
+  if (data.referee && data.referee.name) {
+    var ref = data.referee;
+    var tendColor = ref.tendency === 'high' ? 'var(--red-text)' : ref.tendency === 'low' ? 'var(--green-text)' : 'var(--text-2)';
+    html += '<div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;">' +
+      '<div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Referee</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<div style="font-size:13px;font-weight:500;color:var(--text)">' + ref.name + '</div>' +
+        (ref.avg_cards_per_game != null ? '<div style="text-align:right"><div style="font-size:14px;font-weight:500;color:'+tendColor+'">' + ref.avg_cards_per_game + ' cards/game</div><div style="font-size:10px;color:var(--text-3)">' + ref.tendency + ' tendency</div></div>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  var hInj = (data.injuries && data.injuries.home) || [];
+  var aInj = (data.injuries && data.injuries.away) || [];
+  if (hInj.length > 0 || aInj.length > 0) {
+    html += '<div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 8px">Injuries &amp; unavailability</div>';
+    if (hInj.length > 0) {
+      html += '<div style="font-size:11px;color:var(--text-2);margin-bottom:4px;font-weight:500">' + document.getElementById('hteam').value + '</div>';
+      html += hInj.map(function(i) {
+        return '<div style="font-size:12px;color:var(--text-2);padding:4px 0;">' + i.name + ' <span style="color:var(--text-3)">— ' + (i.reason||i.type) + '</span></div>';
+      }).join('');
+    }
+    if (aInj.length > 0) {
+      html += '<div style="font-size:11px;color:var(--text-2);margin:8px 0 4px;font-weight:500">' + document.getElementById('ateam').value + '</div>';
+      html += aInj.map(function(i) {
+        return '<div style="font-size:12px;color:var(--text-2);padding:4px 0;">' + i.name + ' <span style="color:var(--text-3)">— ' + (i.reason||i.type) + '</span></div>';
+      }).join('');
+    }
+  }
+
+  if (html === '') html = '<div style="font-size:11px;color:var(--text-3);padding:0.5rem 0;">No referee or injury data available for this fixture yet</div>';
+  el.innerHTML = html;
+}
+
 async function loadPlayers() {
   var home = document.getElementById('hteam').value;
   var away = document.getElementById('ateam').value;
@@ -1450,10 +1541,18 @@ async function loadPlayers() {
     status.style.color = 'var(--green-text)';
     renderPlayers(data);
     renderH2H(data);
+    loadContext();
   } catch(e) {
     status.textContent = 'Could not load player stats';
     status.style.color = 'var(--red-text)';
   }
+}
+
+function firstScorerWeight(position) {
+  if (position === 'Attacker') return 1.3;
+  if (position === 'Midfielder') return 0.85;
+  if (position === 'Defender') return 0.4;
+  return 0;
 }
 
 function renderPlayers(data) {
@@ -1467,7 +1566,7 @@ function renderPlayers(data) {
     if (!players || players.length === 0) {
       return '<div style="margin-bottom:1.5rem">' +
         '<div style="font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid '+accentColor+'">'+team+'</div>' +
-        '<div style="font-size:11px;color:var(--text-3);">No data available</div></div>';
+        '<div style="font-size:11px;color:var(--text-3);">Player stats not yet indexed for this team this season — check back once more games are played</div></div>';
     }
     var csPctVal = csPct != null ? (csPct * 100).toFixed(1) + '%' : null;
     var rows = players.slice(0,15).map(function(p) {
@@ -1486,10 +1585,13 @@ function renderPlayers(data) {
       }
       var lowFlag = p.low_sample ? ' <span title="Based on limited minutes this season" style="color:var(--text-3);font-size:9px;">&#9888;</span>' : '';
       var assistCol = p.assist_prob != null ? p.assist_prob + '%' : p.assists_p90.toFixed(1);
+      var fgWeight = firstScorerWeight(p.position);
+      var fgProb = fgWeight > 0 ? Math.min(p.goalscorer_prob * fgWeight * 0.4, 40).toFixed(1) : '0.0';
       return '<tr style="border-bottom:0.5px solid var(--border)">' +
-        '<td style="padding:7px 8px;color:'+nameCol+';font-weight:500;font-size:12px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.name + lowFlag + '</td>' +
+        '<td style="padding:7px 8px;color:'+nameCol+';font-weight:500;font-size:12px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + p.name + lowFlag + '</td>' +
         '<td style="padding:7px 8px;color:var(--text-3);font-size:11px">' + (p.position||'').slice(0,3) + '</td>' +
         '<td style="padding:7px 8px;text-align:right;color:'+sc+';font-size:12px;font-weight:500">' + p.goalscorer_prob + '%</td>' +
+        '<td style="padding:7px 8px;text-align:right;color:var(--text-2);font-size:11px">' + fgProb + '%</td>' +
         '<td style="padding:7px 8px;text-align:right;color:'+yc+';font-size:12px">' + p.yellow_prob + '%</td>' +
         '<td style="padding:7px 8px;text-align:right;color:var(--text-2);font-size:12px">' + p.shots_on_p90.toFixed(1) + '</td>' +
         '<td style="padding:7px 8px;text-align:right;color:var(--text-2);font-size:12px">' + assistCol + '</td>' +
@@ -1503,6 +1605,7 @@ function renderPlayers(data) {
         '<th style="text-align:left;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid);width:35%">Player</th>' +
         '<th style="text-align:left;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid);width:10%">Pos</th>' +
         '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">Scorer</th>' +
+        '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">1st</th>' +
         '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">Card</th>' +
         '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">SoT</th>' +
         '<th style="text-align:right;padding:5px 8px;color:var(--text-3);font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border-mid)">Assist%</th>' +
