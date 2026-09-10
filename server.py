@@ -27,7 +27,7 @@ APIFOOTBALL_TEAM_IDS = {
     "Brentford":          55,
     "Brighton":           51,
     "Chelsea":            49,
-    "Coventry City":      369,
+    "Coventry City":      1346,
     "Crystal Palace":     52,
     "Everton":            45,
     "Fulham":             36,
