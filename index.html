@@ -1701,7 +1701,14 @@ function renderH2H(data) {
   var hP = data.home.players || [];
   var aP = data.away.players || [];
   function sum(arr, key) { return arr.reduce(function(s,p){return s+(p[key]||0);},0).toFixed(1); }
-  function sumF(arr, key) { return arr.reduce(function(s,p){return s+(p[key]||0);},0).toFixed(2); }
+  function sumF(arr, key) {
+    // Team rate per 90: rebuild each player's raw total from their per-90 and minutes,
+    // then divide by team match-equivalents (11 players x 90 mins = 990 player-minutes per match)
+    var mins = arr.reduce(function(s,p){return s+(p.minutes||0);},0);
+    if (!mins) return '0.00';
+    var total = arr.reduce(function(s,p){return s+(p[key]||0)*(p.minutes||0)/90;},0);
+    return (total / (mins / 990)).toFixed(2);
+  }
   function top1(players, key) { return players.slice().sort(function(a,b){return b[key]-a[key];})[0]; }
   function row(label, hv, av, higher) {
     var hw = higher ? parseFloat(hv)>=parseFloat(av) : parseFloat(hv)<=parseFloat(av);
