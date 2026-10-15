@@ -583,8 +583,13 @@ def api_players():
 
         # Merge squad with stats
         result = []
+        seen = set()
         for p in players_raw:
             pid  = p.get("id")
+            # Squad feed can list the same player more than once; keep one row per player
+            if pid in seen:
+                continue
+            seen.add(pid)
             name = p.get("name", "")
             pos  = p.get("position", "")
             s    = stats_map.get(pid, {})
